@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  process.env.NODE_ENV === "production"
+  process.env.REACT_APP_NODE_ENV === "production"
     ? process.env.REACT_APP_PROD_SERVER_URL
     : process.env.REACT_APP_DEV_SERVER_URL;
 
