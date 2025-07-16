@@ -5,7 +5,6 @@ const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const { initializeCollections } = require("./database/mongoCollections");
-const { seedDatabase } = require("./database/seedData");
 
 const termsRoutes = require("./routes/terms");
 const recordsRoutes = require("./routes/records");
@@ -61,9 +60,6 @@ const startServer = async () => {
   try {
     await initializeCollections();
     console.log("Server Ready");
-
-    // Seed database with sample data
-    // await seedDatabase();
 
     // Start server
     app.listen(PORT, () => {
