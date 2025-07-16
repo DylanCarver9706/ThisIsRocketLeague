@@ -10,7 +10,7 @@ const termsRoutes = require("./routes/terms");
 const recordsRoutes = require("./routes/records");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(helmet());
@@ -36,6 +36,12 @@ app.use("/api/", limiter);
 console.log("Setting up API routes...");
 app.use("/api/terms", termsRoutes);
 app.use("/api/records", recordsRoutes);
+
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.json({ message: "This is Rocket League!" });
+});
+
 console.log("API routes configured");
 
 // Error handling middleware
