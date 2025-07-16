@@ -20,6 +20,7 @@ import {
   Book as BookIcon,
   EmojiEvents as TrophyIcon,
   Add as AddIcon,
+  Download as DownloadIcon,
 } from "@mui/icons-material";
 
 const Navbar = () => {
@@ -32,6 +33,7 @@ const Navbar = () => {
     { text: "Home", path: "/", icon: <GameIcon /> },
     { text: "Dictionary", path: "/dictionary", icon: <BookIcon /> },
     { text: "World Records", path: "/world-records", icon: <TrophyIcon /> },
+    { text: "Best Plugins", path: "/plugins", icon: <DownloadIcon /> },
     { text: "Submit Term", path: "/submit-term", icon: <AddIcon /> },
     { text: "Submit Record", path: "/submit-record", icon: <AddIcon /> },
   ];

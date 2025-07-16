@@ -7,6 +7,7 @@ import Dictionary from "./pages/Dictionary";
 import WorldRecords from "./pages/WorldRecords";
 import SubmitTerm from "./pages/SubmitTerm";
 import SubmitRecord from "./pages/SubmitRecord";
+import Plugins from "./pages/Plugins";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/dictionary" element={<Dictionary />} />
           <Route path="/world-records" element={<WorldRecords />} />
+          <Route path="/plugins" element={<Plugins />} />
           <Route path="/submit-term" element={<SubmitTerm />} />
           <Route path="/submit-record" element={<SubmitRecord />} />
         </Routes>

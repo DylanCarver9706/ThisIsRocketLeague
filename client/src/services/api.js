@@ -54,6 +54,13 @@ export const recordsAPI = {
   getCategories: () => api.get("/records/categories/list"),
 };
 
+// Plugins API
+export const pluginsAPI = {
+  getAll: (params = {}) => api.get("/plugins", { params }),
+  getTrending: (limit = 10) => api.get(`/plugins/trending?limit=${limit}`),
+  search: (query) => api.get(`/plugins/search?q=${encodeURIComponent(query)}`),
+};
+
 // Health check
 export const healthAPI = {
   check: () => api.get("/health"),

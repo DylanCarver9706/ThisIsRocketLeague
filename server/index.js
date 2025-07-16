@@ -8,6 +8,7 @@ const { initializeCollections } = require("./database/mongoCollections");
 
 const termsRoutes = require("./routes/terms");
 const recordsRoutes = require("./routes/records");
+const pluginsRoutes = require("./routes/plugins");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -36,6 +37,7 @@ app.use("/api/", limiter);
 console.log("Setting up API routes...");
 app.use("/api/terms", termsRoutes);
 app.use("/api/records", recordsRoutes);
+app.use("/api/plugins", pluginsRoutes);
 
 // Health check endpoint
 app.get("/", (req, res) => {
