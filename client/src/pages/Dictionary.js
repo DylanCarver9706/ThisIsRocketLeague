@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -19,6 +18,10 @@ import {
   IconButton,
   Tooltip,
   Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -42,6 +45,17 @@ const Dictionary = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [likedTerms, setLikedTerms] = useState(new Set());
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [submitForm, setSubmitForm] = useState({
+    term: "",
+    definition: "",
+    category: "",
+    exampleUsage: "",
+    skillLevel: "",
+    submittedBy: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -86,6 +100,45 @@ const Dictionary = () => {
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setPage(1);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+
+      if (
+        !submitForm.term ||
+        !submitForm.definition ||
+        !submitForm.category ||
+        !submitForm.exampleUsage ||
+        !submitForm.skillLevel
+      ) {
+        setSubmitError("Please fill in all required fields");
+        return;
+      }
+
+      await termsService.create(submitForm);
+
+      // Reset form and close dialog
+      setSubmitForm({
+        term: "",
+        definition: "",
+        category: "",
+        exampleUsage: "",
+        skillLevel: "",
+        submittedBy: "",
+      });
+      setSubmitDialogOpen(false);
+
+      // Show success message
+      alert("Term submitted successfully! It will be reviewed by an admin.");
+    } catch (err) {
+      console.error("Error creating term:", err);
+      setSubmitError(err.response?.data?.error || "Failed to submit term");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getSkillLevelColor = (level) => {
@@ -140,11 +193,10 @@ const Dictionary = () => {
           Learn the language of Rocket League with our comprehensive dictionary
         </Typography>
         <Button
-          component={Link}
-          to="/submit-term"
           variant="contained"
           startIcon={<AddIcon />}
           size="large"
+          onClick={() => setSubmitDialogOpen(true)}
         >
           Submit New Term
         </Button>
@@ -384,15 +436,110 @@ const Dictionary = () => {
             Try adjusting your filters or submit a new term
           </Typography>
           <Button
-            component={Link}
-            to="/submit-term"
             variant="contained"
             startIcon={<AddIcon />}
+            onClick={() => setSubmitDialogOpen(true)}
           >
             Submit New Term
           </Button>
         </Box>
       )}
+
+      {/* Submit Dialog */}
+      <Dialog
+        open={submitDialogOpen}
+        onClose={() => setSubmitDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Submit New Term</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+            <TextField
+              label="Term"
+              value={submitForm.term}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, term: e.target.value })
+              }
+              fullWidth
+              required
+            />
+            <TextField
+              label="Definition"
+              value={submitForm.definition}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, definition: e.target.value })
+              }
+              fullWidth
+              multiline
+              rows={3}
+              required
+            />
+            <FormControl fullWidth required>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={submitForm.category}
+                label="Category"
+                onChange={(e) =>
+                  setSubmitForm({ ...submitForm, category: e.target.value })
+                }
+              >
+                <MenuItem value="Mechanics">Mechanics</MenuItem>
+                <MenuItem value="Slang">Slang</MenuItem>
+                <MenuItem value="Strategy">Strategy</MenuItem>
+                <MenuItem value="Tactics">Tactics</MenuItem>
+                <MenuItem value="Equipment">Equipment</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Example Usage"
+              value={submitForm.exampleUsage}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, exampleUsage: e.target.value })
+              }
+              fullWidth
+              multiline
+              rows={2}
+              required
+            />
+            <FormControl fullWidth required>
+              <InputLabel>Skill Level</InputLabel>
+              <Select
+                value={submitForm.skillLevel}
+                label="Skill Level"
+                onChange={(e) =>
+                  setSubmitForm({ ...submitForm, skillLevel: e.target.value })
+                }
+              >
+                <MenuItem value="Beginner">Beginner</MenuItem>
+                <MenuItem value="Intermediate">Intermediate</MenuItem>
+                <MenuItem value="Pro">Pro</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Your Name (optional)"
+              value={submitForm.submittedBy}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, submittedBy: e.target.value })
+              }
+              fullWidth
+            />
+
+            {submitError && <Alert severity="error">{submitError}</Alert>}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubmitDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

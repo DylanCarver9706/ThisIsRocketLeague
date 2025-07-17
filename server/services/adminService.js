@@ -2,7 +2,7 @@ const { collections } = require("../database/mongoCollections");
 const { updateMongoDocument } = require("../database/middlewares/mongo");
 
 class AdminService {
-  // Get all submissions (terms and records) with their status
+  // Get all submissions (terms, records, and car designs) with their status
   async getAllSubmissions() {
     try {
       const terms = await collections.termsCollection
@@ -13,12 +13,17 @@ class AdminService {
         .find({})
         .sort({ createdAt: -1 })
         .toArray();
+      const carDesigns = await collections.carDesignsCollection
+        .find({})
+        .sort({ createdAt: -1 })
+        .toArray();
 
       return {
         success: true,
         data: {
           terms,
           records,
+          carDesigns,
         },
         counts: {
           terms: {
@@ -32,6 +37,13 @@ class AdminService {
             review: records.filter((r) => r.status === "review").length,
             published: records.filter((r) => r.status === "published").length,
             rejected: records.filter((r) => r.status === "rejected").length,
+          },
+          carDesigns: {
+            total: carDesigns.length,
+            review: carDesigns.filter((c) => c.status === "review").length,
+            published: carDesigns.filter((c) => c.status === "published")
+              .length,
+            rejected: carDesigns.filter((c) => c.status === "rejected").length,
           },
         },
       };
@@ -71,6 +83,15 @@ class AdminService {
         counts.records = records.length;
       }
 
+      if (!type || type === "carDesigns") {
+        const carDesigns = await collections.carDesignsCollection
+          .find({ status })
+          .sort({ createdAt: -1 })
+          .toArray();
+        data.carDesigns = carDesigns;
+        counts.carDesigns = carDesigns.length;
+      }
+
       return {
         success: true,
         data,
@@ -93,8 +114,8 @@ class AdminService {
         throw new Error("Missing required fields: id, type, status");
       }
 
-      if (!["terms", "records"].includes(type)) {
-        throw new Error("Invalid type. Must be 'terms' or 'records'");
+      if (!["terms", "records", "carDesigns"].includes(type)) {
+        throw new Error("Invalid type. Must be 'terms', 'records', or 'carDesigns'");
       }
 
       if (!["rejected", "review", "published"].includes(status)) {
@@ -103,10 +124,13 @@ class AdminService {
         );
       }
 
-      const collection =
-        type === "terms"
-          ? collections.termsCollection
-          : collections.recordsCollection;
+      const collectionsDict = {
+        terms: collections.termsCollection,
+        records: collections.recordsCollection,
+        carDesigns: collections.carDesignsCollection,
+      };
+
+      const collection = collectionsDict[type];
 
       // Use the updateMongoDocument middleware function
       const updatedDocument = await updateMongoDocument(
@@ -134,14 +158,18 @@ class AdminService {
   // Delete submission
   async deleteSubmission(id, type) {
     try {
-      if (!["terms", "records"].includes(type)) {
-        throw new Error("Invalid type. Must be 'terms' or 'records'");
+      if (!["terms", "records", "carDesigns"].includes(type)) {
+        throw new Error(
+          "Invalid type. Must be 'terms', 'records', or 'carDesigns'"
+        );
       }
 
       const collection =
         type === "terms"
           ? collections.termsCollection
-          : collections.recordsCollection;
+          : type === "records"
+          ? collections.recordsCollection
+          : collections.carDesignsCollection;
 
       // Try to delete with ObjectId first, then with string ID as fallback
       let result;
@@ -173,6 +201,9 @@ class AdminService {
     try {
       const terms = await collections.termsCollection.find({}).toArray();
       const records = await collections.recordsCollection.find({}).toArray();
+      const carDesigns = await collections.carDesignsCollection
+        .find({})
+        .toArray();
 
       const stats = {
         terms: {
@@ -187,6 +218,12 @@ class AdminService {
           published: records.filter((r) => r.status === "published").length,
           rejected: records.filter((r) => r.status === "rejected").length,
         },
+        carDesigns: {
+          total: carDesigns.length,
+          review: carDesigns.filter((c) => c.status === "review").length,
+          published: carDesigns.filter((c) => c.status === "published").length,
+          rejected: carDesigns.filter((c) => c.status === "rejected").length,
+        },
         recent: {
           terms: await collections.termsCollection
             .find({})
@@ -194,6 +231,11 @@ class AdminService {
             .limit(5)
             .toArray(),
           records: await collections.recordsCollection
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .toArray(),
+          carDesigns: await collections.carDesignsCollection
             .find({})
             .sort({ createdAt: -1 })
             .limit(5)

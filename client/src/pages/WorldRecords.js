@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -20,6 +19,10 @@ import {
   Tooltip,
   Pagination,
   Link as MuiLink,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -44,6 +47,18 @@ const WorldRecords = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [likedRecords, setLikedRecords] = useState(new Set());
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [submitForm, setSubmitForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    recordHolderName: "",
+    proofUrl: "",
+    dateAchieved: "",
+    submittedBy: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -88,6 +103,47 @@ const WorldRecords = () => {
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setPage(1);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+
+      if (
+        !submitForm.title ||
+        !submitForm.description ||
+        !submitForm.category ||
+        !submitForm.recordHolderName ||
+        !submitForm.proofUrl ||
+        !submitForm.dateAchieved
+      ) {
+        setSubmitError("Please fill in all required fields");
+        return;
+      }
+
+      await recordsService.create(submitForm);
+
+      // Reset form and close dialog
+      setSubmitForm({
+        title: "",
+        description: "",
+        category: "",
+        recordHolderName: "",
+        proofUrl: "",
+        dateAchieved: "",
+        submittedBy: "",
+      });
+      setSubmitDialogOpen(false);
+
+      // Show success message
+      alert("Record submitted successfully! It will be reviewed by an admin.");
+    } catch (err) {
+      console.error("Error creating record:", err);
+      setSubmitError(err.response?.data?.error || "Failed to submit record");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getCategoryColor = (category) => {
@@ -139,11 +195,10 @@ const WorldRecords = () => {
           Discover the most incredible achievements in Rocket League history
         </Typography>
         <Button
-          component={Link}
-          to="/submit-record"
           variant="contained"
           startIcon={<AddIcon />}
           size="large"
+          onClick={() => setSubmitDialogOpen(true)}
         >
           Submit New Record
         </Button>
@@ -387,15 +442,130 @@ const WorldRecords = () => {
             Try adjusting your filters or submit a new record
           </Typography>
           <Button
-            component={Link}
-            to="/submit-record"
             variant="contained"
             startIcon={<AddIcon />}
+            onClick={() => setSubmitDialogOpen(true)}
           >
             Submit New Record
           </Button>
         </Box>
       )}
+
+      {/* Submit Dialog */}
+      <Dialog
+        open={submitDialogOpen}
+        onClose={() => setSubmitDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Submit New Record</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+            <TextField
+              label="Title"
+              value={submitForm.title}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, title: e.target.value })
+              }
+              fullWidth
+              required
+            />
+            <TextField
+              label="Description"
+              value={submitForm.description}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, description: e.target.value })
+              }
+              fullWidth
+              multiline
+              rows={3}
+              required
+            />
+            <FormControl fullWidth required>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={submitForm.category}
+                label="Category"
+                onChange={(e) =>
+                  setSubmitForm({ ...submitForm, category: e.target.value })
+                }
+              >
+                <MenuItem value="Fastest Goal">Fastest Goal</MenuItem>
+                <MenuItem value="Longest Air Dribble">
+                  Longest Air Dribble
+                </MenuItem>
+                <MenuItem value="Highest MMR">Highest MMR</MenuItem>
+                <MenuItem value="Most Goals in Match">
+                  Most Goals in Match
+                </MenuItem>
+                <MenuItem value="Longest Win Streak">
+                  Longest Win Streak
+                </MenuItem>
+                <MenuItem value="Fastest Aerial Goal">
+                  Fastest Aerial Goal
+                </MenuItem>
+                <MenuItem value="Most Saves in Match">
+                  Most Saves in Match
+                </MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Record Holder Name"
+              value={submitForm.recordHolderName}
+              onChange={(e) =>
+                setSubmitForm({
+                  ...submitForm,
+                  recordHolderName: e.target.value,
+                })
+              }
+              fullWidth
+              required
+            />
+            <TextField
+              label="Proof URL"
+              value={submitForm.proofUrl}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, proofUrl: e.target.value })
+              }
+              fullWidth
+              required
+              placeholder="https://example.com/proof"
+            />
+            <TextField
+              label="Date Achieved"
+              type="date"
+              value={submitForm.dateAchieved}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, dateAchieved: e.target.value })
+              }
+              fullWidth
+              required
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Your Name (optional)"
+              value={submitForm.submittedBy}
+              onChange={(e) =>
+                setSubmitForm({ ...submitForm, submittedBy: e.target.value })
+              }
+              fullWidth
+            />
+
+            {submitError && <Alert severity="error">{submitError}</Alert>}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubmitDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

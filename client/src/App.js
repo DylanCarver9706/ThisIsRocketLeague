@@ -5,9 +5,8 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Dictionary from "./pages/Dictionary";
 import WorldRecords from "./pages/WorldRecords";
-import SubmitTerm from "./pages/SubmitTerm";
-import SubmitRecord from "./pages/SubmitRecord";
 import Plugins from "./pages/Plugins";
+import CarDesigns from "./pages/CarDesigns";
 import Admin from "./pages/Admin";
 
 function App() {
@@ -20,8 +19,7 @@ function App() {
           <Route path="/dictionary" element={<Dictionary />} />
           <Route path="/world-records" element={<WorldRecords />} />
           <Route path="/plugins" element={<Plugins />} />
-          <Route path="/submit-term" element={<SubmitTerm />} />
-          <Route path="/submit-record" element={<SubmitRecord />} />
+          <Route path="/car-designs" element={<CarDesigns />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </Box>

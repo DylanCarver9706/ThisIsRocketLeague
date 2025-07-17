@@ -40,10 +40,18 @@ const Admin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
-  const [submissions, setSubmissions] = useState({ terms: [], records: [] });
+  const [submissions, setSubmissions] = useState({
+    terms: [],
+    records: [],
+    carDesigns: [],
+  });
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedStatus, setSelectedStatus] = useState("review");
-  const [statusDialog, setStatusDialog] = useState({ open: false, submission: null, newStatus: "" });
+  const [statusDialog, setStatusDialog] = useState({
+    open: false,
+    submission: null,
+    newStatus: "",
+  });
 
   const handleLogin = async () => {
     if (!adminKey.trim()) {
@@ -81,9 +89,13 @@ const Admin = () => {
 
   const handleStatusUpdate = async (submission, newStatus) => {
     try {
+      // Determine type based on current tab
+      const typeMap = ["terms", "records", "carDesigns"];
+      const type = typeMap[currentTab];
+
       await adminService.updateSubmissionStatus(
         submission._id,
-        submission.term ? "terms" : "records",
+        type,
         newStatus,
         adminKey
       );
@@ -101,11 +113,11 @@ const Admin = () => {
     }
 
     try {
-      await adminService.deleteSubmission(
-        submission._id,
-        submission.term ? "terms" : "records",
-        adminKey
-      );
+      // Determine type based on current tab
+      const typeMap = ["terms", "records", "carDesigns"];
+      const type = typeMap[currentTab];
+
+      await adminService.deleteSubmission(submission._id, type, adminKey);
       fetchDashboardData();
     } catch (err) {
       console.error("Error deleting submission:", err);
@@ -205,12 +217,14 @@ const Admin = () => {
 
       {stats && (
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {["terms", "records"].map((section) => (
-            <Grid item xs={12} md={6} key={section}>
+          {["terms", "records", "carDesigns"].map((section) => (
+            <Grid item xs={12} md={4} key={section}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    {section.charAt(0).toUpperCase() + section.slice(1)}
+                    {section === "carDesigns"
+                      ? "Car Designs"
+                      : section.charAt(0).toUpperCase() + section.slice(1)}
                   </Typography>
                   <Grid container spacing={2}>
                     {["total", "review", "published"].map((key) => (
@@ -249,6 +263,7 @@ const Admin = () => {
           >
             <Tab label="Terms" />
             <Tab label="Records" />
+            <Tab label="Car Designs" />
           </Tabs>
 
           <Box sx={{ mb: 3 }}>
@@ -267,7 +282,12 @@ const Admin = () => {
           </Box>
 
           <List>
-            {(currentTab === 0 ? submissions.terms : submissions.records)
+            {(currentTab === 0
+              ? submissions.terms
+              : currentTab === 1
+              ? submissions.records
+              : submissions.carDesigns
+            )
               .filter((item) => item.status === selectedStatus)
               .map((submission) => (
                 <ListItem
@@ -281,7 +301,9 @@ const Admin = () => {
                 >
                   <ListItemText
                     primary={
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <Typography variant="h6">
                           {submission.term || submission.title}
                         </Typography>
@@ -297,6 +319,19 @@ const Admin = () => {
                         <Typography variant="body2" sx={{ mb: 1 }}>
                           {submission.definition || submission.description}
                         </Typography>
+                        {submission.image && (
+                          <Box sx={{ mb: 1 }}>
+                            <img
+                              src={submission.image}
+                              alt={submission.title}
+                              style={{
+                                maxWidth: "200px",
+                                maxHeight: "150px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </Box>
+                        )}
                         <Typography variant="caption" color="text.secondary">
                           Submitted by: {submission.submittedBy} |{" "}
                           {formatDate(submission.createdAt)}
@@ -346,9 +381,12 @@ const Admin = () => {
               ))}
           </List>
 
-          {(currentTab === 0 ? submissions.terms : submissions.records).filter(
-            (item) => item.status === selectedStatus
-          ).length === 0 && (
+          {(currentTab === 0
+            ? submissions.terms
+            : currentTab === 1
+            ? submissions.records
+            : submissions.carDesigns
+          ).filter((item) => item.status === selectedStatus).length === 0 && (
             <Box sx={{ textAlign: "center", py: 4 }}>
               <Typography variant="h6" color="text.secondary">
                 No {selectedStatus} submissions found
@@ -381,7 +419,10 @@ const Admin = () => {
           </Button>
           <Button
             onClick={() =>
-              handleStatusUpdate(statusDialog.submission, statusDialog.newStatus)
+              handleStatusUpdate(
+                statusDialog.submission,
+                statusDialog.newStatus
+              )
             }
             color={statusDialog.newStatus === "published" ? "success" : "error"}
             variant="contained"

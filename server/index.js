@@ -10,6 +10,7 @@ const termsRoutes = require("./routes/terms");
 const recordsRoutes = require("./routes/records");
 const pluginsRoutes = require("./routes/plugins");
 const adminRoutes = require("./routes/admin");
+const carDesignsRoutes = require("./routes/carDesigns");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -40,6 +41,7 @@ app.use("/api/terms", termsRoutes);
 app.use("/api/records", recordsRoutes);
 app.use("/api/plugins", pluginsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/car-designs", carDesignsRoutes);
 
 // Health check endpoint
 app.get("/", (req, res) => {
