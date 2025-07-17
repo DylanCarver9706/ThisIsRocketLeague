@@ -38,6 +38,11 @@ const termSchema = new mongoose.Schema(
       maxlength: [50, "Submitted by name cannot exceed 50 characters"],
       default: "Anonymous",
     },
+    status: {
+      type: String,
+      enum: ["rejected", "review", "published"],
+      default: "review",
+    },
     likeCount: {
       type: Number,
       default: 0,
@@ -59,6 +64,7 @@ const termSchema = new mongoose.Schema(
 termSchema.index({ category: 1, skillLevel: 1 });
 termSchema.index({ likeCount: -1 });
 termSchema.index({ createdAt: -1 });
+termSchema.index({ status: 1 });
 
 // Virtual for trending score (likes + recency)
 termSchema.virtual("trendingScore").get(function () {

@@ -303,8 +303,11 @@ const SubmitRecord = () => {
               Record Submitted Successfully!
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Your record "{formData.title}" has been added to the world
-              records.
+              Your record "{formData.title}" has been submitted and is under
+              review.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              It will be published once approved by our team.
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               Redirecting to world records...
@@ -388,4 +391,3 @@ const SubmitRecord = () => {
 };
 
 export default SubmitRecord;
- 

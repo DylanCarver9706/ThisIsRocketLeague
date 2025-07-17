@@ -271,7 +271,11 @@ const SubmitTerm = () => {
               Term Submitted Successfully!
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Your term "{formData.term}" has been added to the dictionary.
+              Your term "{formData.term}" has been submitted and is under
+              review.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              It will be published once approved by our team.
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               Redirecting to dictionary...

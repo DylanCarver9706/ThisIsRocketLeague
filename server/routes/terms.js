@@ -21,3 +21,4 @@ router.post("/", termsController.createTerm);
 router.post("/:id/like", termsController.likeTerm);
 
 module.exports = router;
+ 

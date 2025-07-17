@@ -1,8 +1,8 @@
 const { collections } = require("../database/mongoCollections");
-const { ObjectId } = require("mongodb");
+const { createMongoDocument } = require("../database/middlewares/mongo");
 
 class RecordsService {
-  // Get all records with filtering and pagination
+  // Get all records with filtering and pagination (only published)
   async getAllRecords(params = {}) {
     try {
       const {
@@ -13,8 +13,8 @@ class RecordsService {
         search,
       } = params;
 
-      // Build filter object
-      const filter = {};
+      // Build filter object - only show published records
+      const filter = { status: "published" };
       if (category) filter.category = category;
       if (search) {
         filter.$or = [
@@ -71,11 +71,12 @@ class RecordsService {
     }
   }
 
-  // Get a specific record by ID
+  // Get a specific record by ID (only published)
   async getRecordById(id) {
     try {
       const record = await collections.recordsCollection.findOne({
         _id: new ObjectId(id),
+        status: "published",
       });
 
       if (!record) {
@@ -89,7 +90,7 @@ class RecordsService {
     }
   }
 
-  // Create a new record
+  // Create a new record (defaults to review status)
   async createRecord(recordData) {
     try {
       const {
@@ -122,21 +123,22 @@ class RecordsService {
         proofUrl,
         dateAchieved: new Date(dateAchieved),
         submittedBy: submittedBy || "Anonymous",
+        status: "review", // Default to review status
         likeCount: 0,
         likedBy: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      const result = await collections.recordsCollection.insertOne(newRecord);
-      const savedRecord = await collections.recordsCollection.findOne({
-        _id: result.insertedId,
-      });
+      // Use the createMongoDocument middleware function
+      const savedRecord = await createMongoDocument(
+        collections.recordsCollection,
+        newRecord,
+        true // Return the created document
+      );
 
       return {
         success: true,
         data: savedRecord,
-        message: "Record created successfully",
+        message: "Record submitted successfully and is under review",
       };
     } catch (error) {
       console.error("Error creating record:", error);
@@ -144,11 +146,12 @@ class RecordsService {
     }
   }
 
-  // Like a record
+  // Like a record (only published records can be liked)
   async likeRecord(id, clientId) {
     try {
       const record = await collections.recordsCollection.findOne({
         _id: new ObjectId(id),
+        status: "published",
       });
 
       if (!record) {
@@ -180,11 +183,11 @@ class RecordsService {
     }
   }
 
-  // Get trending records
+  // Get trending records (only published)
   async getTrendingRecords(limit = 10) {
     try {
       const trendingRecords = await collections.recordsCollection
-        .find()
+        .find({ status: "published" })
         .sort({ likeCount: -1, createdAt: -1 })
         .limit(parseInt(limit))
         .toArray();
@@ -200,11 +203,15 @@ class RecordsService {
     }
   }
 
-  // Get categories
+  // Get categories (only from published records)
   async getCategories() {
     try {
       const categories = await collections.recordsCollection
-        .aggregate([{ $group: { _id: "$category" } }, { $sort: { _id: 1 } }])
+        .aggregate([
+          { $match: { status: "published" } },
+          { $group: { _id: "$category" } },
+          { $sort: { _id: 1 } },
+        ])
         .toArray();
 
       const categoryList = categories.map((cat) => cat._id);

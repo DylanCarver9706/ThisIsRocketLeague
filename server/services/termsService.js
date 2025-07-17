@@ -1,8 +1,8 @@
 const { collections } = require("../database/mongoCollections");
-const { ObjectId } = require("mongodb");
+const { createMongoDocument } = require("../database/middlewares/mongo");
 
 class TermsService {
-  // Get all terms with filtering and pagination
+  // Get all terms with filtering and pagination (only published)
   async getAllTerms(params = {}) {
     try {
       const {
@@ -14,8 +14,8 @@ class TermsService {
         search,
       } = params;
 
-      // Build filter object
-      const filter = {};
+      // Build filter object - only show published terms
+      const filter = { status: "published" };
       if (category) filter.category = category;
       if (skillLevel) filter.skillLevel = skillLevel;
       if (search) {
@@ -70,11 +70,12 @@ class TermsService {
     }
   }
 
-  // Get a specific term by ID
+  // Get a specific term by ID (only published)
   async getTermById(id) {
     try {
       const term = await collections.termsCollection.findOne({
         _id: new ObjectId(id),
+        status: "published",
       });
 
       if (!term) {
@@ -88,7 +89,7 @@ class TermsService {
     }
   }
 
-  // Create a new term
+  // Create a new term (defaults to review status)
   async createTerm(termData) {
     try {
       const {
@@ -112,21 +113,22 @@ class TermsService {
         exampleUsage,
         skillLevel,
         submittedBy: submittedBy || "Anonymous",
+        status: "review", // Default to review status
         likeCount: 0,
         likedBy: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      const result = await collections.termsCollection.insertOne(newTerm);
-      const savedTerm = await collections.termsCollection.findOne({
-        _id: result.insertedId,
-      });
+      // Use the createMongoDocument middleware function
+      const savedTerm = await createMongoDocument(
+        collections.termsCollection,
+        newTerm,
+        true // Return the created document
+      );
 
       return {
         success: true,
         data: savedTerm,
-        message: "Term created successfully",
+        message: "Term submitted successfully and is under review",
       };
     } catch (error) {
       console.error("Error creating term:", error);
@@ -134,11 +136,12 @@ class TermsService {
     }
   }
 
-  // Like a term
+  // Like a term (only published terms can be liked)
   async likeTerm(id, clientId) {
     try {
       const term = await collections.termsCollection.findOne({
         _id: new ObjectId(id),
+        status: "published",
       });
 
       if (!term) {
@@ -170,11 +173,11 @@ class TermsService {
     }
   }
 
-  // Get trending terms
+  // Get trending terms (only published)
   async getTrendingTerms(limit = 10) {
     try {
       const trendingTerms = await collections.termsCollection
-        .find()
+        .find({ status: "published" })
         .sort({ likeCount: -1, createdAt: -1 })
         .limit(parseInt(limit))
         .toArray();
@@ -190,22 +193,23 @@ class TermsService {
     }
   }
 
-  // Get categories
+  // Get categories (only from published terms)
   async getCategories() {
     try {
       const categories = await collections.termsCollection
         .aggregate([
+          { $match: { status: "published" } },
           { $group: { _id: "$category" } },
-          { $sort: { _id: 1 } }
+          { $sort: { _id: 1 } },
         ])
         .toArray();
 
-      const categoryList = categories.map(cat => cat._id);
+      const categoryList = categories.map((cat) => cat._id);
 
       return {
         success: true,
         data: categoryList,
-        count: categoryList.length
+        count: categoryList.length,
       };
     } catch (error) {
       console.error("Error fetching categories:", error);
