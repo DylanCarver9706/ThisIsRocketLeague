@@ -152,13 +152,26 @@ const Plugins = () => {
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >
-                        <Typography
-                          variant="h6"
-                          component="h3"
-                          sx={{ fontWeight: "bold" }}
+                        <MuiLink
+                          href={plugin.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            textDecoration: "none",
+                            color: "inherit",
+                            "&:hover": {
+                              textDecoration: "underline",
+                            },
+                          }}
                         >
-                          {plugin.name}
-                        </Typography>
+                          <Typography
+                            variant="h6"
+                            component="h3"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            {plugin.name}
+                          </Typography>
+                        </MuiLink>
                         <Tooltip
                           title={
                             plugin.isVerified

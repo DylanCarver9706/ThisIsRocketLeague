@@ -95,7 +95,7 @@ class PluginsService {
       });
 
       // Extract plugin URL from data-href attribute
-      const urlMatch = row.match(/data-href="([^"]*)"/i);
+      const urlMatch = row.match(/href="([^"]*)"/i);
       const pluginUrl = urlMatch ? urlMatch[1] : "";
       const fullUrl = pluginUrl ? `https://bakkesplugins.com${pluginUrl}` : "";
 
