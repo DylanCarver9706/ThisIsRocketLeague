@@ -198,6 +198,47 @@ class RecordsService {
     }
   }
 
+  // Unlike a record (only published records can be unliked)
+  async unlikeRecord(id, clientId) {
+    try {
+      const record = await collections.recordsCollection.findOne({
+        _id: new ObjectId(id),
+        status: "published",
+      });
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      // Check if user has liked this record
+      if (!record.likedBy.includes(clientId)) {
+        throw new Error("You have not liked this record");
+      }
+
+      // Remove like using updateMongoDocument
+      const updateData = {
+        $pull: { likedBy: clientId },
+        $inc: { likeCount: -1 },
+      };
+
+      await updateMongoDocument(
+        collections.recordsCollection,
+        id,
+        updateData,
+        false
+      );
+
+      return {
+        success: true,
+        data: { likeCount: record.likeCount - 1 },
+        message: "Record unliked successfully",
+      };
+    } catch (error) {
+      console.error("Error unliking record:", error);
+      throw error;
+    }
+  }
+
   // Get trending records (only published)
   async getTrendingRecords(limit = 10) {
     try {

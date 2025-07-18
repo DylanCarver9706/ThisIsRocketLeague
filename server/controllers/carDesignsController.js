@@ -94,6 +94,37 @@ class CarDesignsController {
     }
   }
 
+  // Unlike a car design
+  async unlikeCarDesign(req, res) {
+    try {
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
+      const result = await carDesignsService.unlikeCarDesign(
+        req.params.id,
+        clientId
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Controller error unliking car design:", error);
+      if (error.message === "Car design not found") {
+        return res.status(404).json({
+          success: false,
+          error: "Car design not found",
+        });
+      }
+      if (error.message === "You have not liked this car design") {
+        return res.status(400).json({
+          success: false,
+          error: "You have not liked this car design",
+        });
+      }
+      res.status(500).json({
+        success: false,
+        error: "Failed to unlike car design",
+      });
+    }
+  }
+
   // Get trending car designs
   async getTrendingCarDesigns(req, res) {
     try {

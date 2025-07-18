@@ -20,5 +20,8 @@ router.post("/", termsController.createTerm);
 // Like a term
 router.post("/:id/like", termsController.likeTerm);
 
+// Unlike a term
+router.delete("/:id/like", termsController.unlikeTerm);
+
 module.exports = router;
  

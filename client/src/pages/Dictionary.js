@@ -83,16 +83,30 @@ const Dictionary = () => {
 
   const handleLike = async (termId) => {
     try {
-      await termsService.like(termId);
-      setTerms((prevTerms) =>
-        prevTerms.map((term) =>
-          term._id === termId
-            ? { ...term, likeCount: term.likeCount + 1, isLiked: true }
-            : term
-        )
-      );
+      const term = terms.find((t) => t._id === termId);
+      if (term.isLiked) {
+        // Unlike
+        await termsService.unlike(termId);
+        setTerms((prevTerms) =>
+          prevTerms.map((t) =>
+            t._id === termId
+              ? { ...t, likeCount: t.likeCount - 1, isLiked: false }
+              : t
+          )
+        );
+      } else {
+        // Like
+        await termsService.like(termId);
+        setTerms((prevTerms) =>
+          prevTerms.map((t) =>
+            t._id === termId
+              ? { ...t, likeCount: t.likeCount + 1, isLiked: true }
+              : t
+          )
+        );
+      }
     } catch (err) {
-      console.error("Error liking term:", err);
+      console.error("Error toggling like:", err);
     }
   };
 
@@ -382,9 +396,7 @@ const Dictionary = () => {
                       >
                         <Tooltip
                           title={
-                            term.isLiked
-                              ? "You've already liked this"
-                              : "Like this term"
+                            term.isLiked ? "Click to unlike" : "Like this term"
                           }
                         >
                           <IconButton

@@ -188,6 +188,47 @@ class TermsService {
     }
   }
 
+  // Unlike a term (only published terms can be unliked)
+  async unlikeTerm(id, clientId) {
+    try {
+      const term = await collections.termsCollection.findOne({
+        _id: new ObjectId(id),
+        status: "published",
+      });
+
+      if (!term) {
+        throw new Error("Term not found");
+      }
+
+      // Check if user has liked this term
+      if (!term.likedBy.includes(clientId)) {
+        throw new Error("You have not liked this term");
+      }
+
+      // Remove like using updateMongoDocument
+      const updateData = {
+        $pull: { likedBy: clientId },
+        $inc: { likeCount: -1 },
+      };
+
+      await updateMongoDocument(
+        collections.termsCollection,
+        id,
+        updateData,
+        false
+      );
+
+      return {
+        success: true,
+        data: { likeCount: term.likeCount - 1 },
+        message: "Term unliked successfully",
+      };
+    } catch (error) {
+      console.error("Error unliking term:", error);
+      throw error;
+    }
+  }
+
   // Get trending terms (only published)
   async getTrendingTerms(limit = 10) {
     try {

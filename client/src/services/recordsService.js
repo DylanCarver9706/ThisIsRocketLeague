@@ -45,6 +45,17 @@ export const recordsService = {
     }
   },
 
+  // Unlike a record
+  unlike: async (id) => {
+    try {
+      const response = await recordsAPI.unlike(id);
+      return response.data;
+    } catch (error) {
+      console.error("Error unliking record:", error);
+      throw error;
+    }
+  },
+
   // Get trending records
   getTrending: async (limit = 10) => {
     try {

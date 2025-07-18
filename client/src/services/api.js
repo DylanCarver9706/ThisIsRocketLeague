@@ -43,6 +43,7 @@ export const termsAPI = {
   getById: (id) => api.get(`/terms/${id}`),
   create: (data) => api.post("/terms", data),
   like: (id) => api.post(`/terms/${id}/like`),
+  unlike: (id) => api.delete(`/terms/${id}/like`),
   getTrending: (limit = 10) => api.get(`/terms/trending/limit?limit=${limit}`),
   getCategories: () => api.get("/terms/categories/list"),
 };
@@ -53,6 +54,7 @@ export const recordsAPI = {
   getById: (id) => api.get(`/records/${id}`),
   create: (data) => api.post("/records", data),
   like: (id) => api.post(`/records/${id}/like`),
+  unlike: (id) => api.delete(`/records/${id}/like`),
   getTrending: (limit = 10) =>
     api.get(`/records/trending/limit?limit=${limit}`),
   getCategories: () => api.get("/records/categories/list"),

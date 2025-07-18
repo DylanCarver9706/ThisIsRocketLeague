@@ -41,6 +41,16 @@ class CarDesignsService {
     }
   }
 
+  // Unlike a car design
+  async unlikeCarDesign(id) {
+    try {
+      const response = await api.delete(`/car-designs/${id}/like`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Get trending car designs
   async getTrendingCarDesigns(limit = 10) {
     try {

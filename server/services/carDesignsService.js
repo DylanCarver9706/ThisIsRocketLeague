@@ -180,6 +180,46 @@ class CarDesignsService {
     }
   }
 
+  // Unlike a car design (only published car designs can be unliked)
+  async unlikeCarDesign(id, clientId) {
+    try {
+      const { ObjectId } = require("mongodb");
+      const carDesign = await collections.carDesignsCollection.findOne({
+        _id: new ObjectId(id),
+        status: "published",
+      });
+
+      if (!carDesign) {
+        throw new Error("Car design not found");
+      }
+
+      // Check if user has liked this car design
+      if (!carDesign.likedBy.includes(clientId)) {
+        throw new Error("You have not liked this car design");
+      }
+
+      // Remove like using updateMongoDocument middleware
+      await updateMongoDocument(
+        collections.carDesignsCollection,
+        id,
+        {
+          $pull: { likedBy: clientId },
+          $inc: { likeCount: -1 },
+        },
+        false
+      );
+
+      return {
+        success: true,
+        data: { likeCount: carDesign.likeCount - 1 },
+        message: "Car design unliked successfully",
+      };
+    } catch (error) {
+      console.error("Error unliking car design:", error);
+      throw error;
+    }
+  }
+
   // Get trending car designs (only published)
   async getTrendingCarDesigns(limit = 10) {
     try {

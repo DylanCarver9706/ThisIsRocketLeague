@@ -85,6 +85,34 @@ class TermsController {
     }
   }
 
+  // Unlike a term
+  async unlikeTerm(req, res) {
+    try {
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
+      const result = await termsService.unlikeTerm(req.params.id, clientId);
+      res.json(result);
+    } catch (error) {
+      console.error("Controller error unliking term:", error);
+      if (error.message === "Term not found") {
+        return res.status(404).json({
+          success: false,
+          error: "Term not found",
+        });
+      }
+      if (error.message === "You have not liked this term") {
+        return res.status(400).json({
+          success: false,
+          error: "You have not liked this term",
+        });
+      }
+      res.status(500).json({
+        success: false,
+        error: "Failed to unlike term",
+      });
+    }
+  }
+
   // Get trending terms
   async getTrendingTerms(req, res) {
     try {

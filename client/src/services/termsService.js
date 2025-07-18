@@ -46,6 +46,17 @@ export const termsService = {
     }
   },
 
+  // Unlike a term
+  unlike: async (id) => {
+    try {
+      const response = await termsAPI.unlike(id);
+      return response.data;
+    } catch (error) {
+      console.error("Error unliking term:", error);
+      throw error;
+    }
+  },
+
   // Get trending terms
   getTrending: async (limit = 10) => {
     try {

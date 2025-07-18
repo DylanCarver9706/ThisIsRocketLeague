@@ -20,5 +20,7 @@ router.post("/", recordsController.createRecord);
 // Like a record
 router.post("/:id/like", recordsController.likeRecord);
 
+// Unlike a record
+router.delete("/:id/like", recordsController.unlikeRecord);
+
 module.exports = router;
- 

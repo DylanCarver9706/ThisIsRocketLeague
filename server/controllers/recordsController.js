@@ -85,6 +85,34 @@ class RecordsController {
     }
   }
 
+  // Unlike a record
+  async unlikeRecord(req, res) {
+    try {
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
+      const result = await recordsService.unlikeRecord(req.params.id, clientId);
+      res.json(result);
+    } catch (error) {
+      console.error("Controller error unliking record:", error);
+      if (error.message === "Record not found") {
+        return res.status(404).json({
+          success: false,
+          error: "Record not found",
+        });
+      }
+      if (error.message === "You have not liked this record") {
+        return res.status(400).json({
+          success: false,
+          error: "You have not liked this record",
+        });
+      }
+      res.status(500).json({
+        success: false,
+        error: "Failed to unlike record",
+      });
+    }
+  }
+
   // Get trending records
   async getTrendingRecords(req, res) {
     try {

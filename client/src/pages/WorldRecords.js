@@ -86,16 +86,30 @@ const WorldRecords = () => {
 
   const handleLike = async (recordId) => {
     try {
-      await recordsService.like(recordId);
-      setRecords((prevRecords) =>
-        prevRecords.map((record) =>
-          record._id === recordId
-            ? { ...record, likeCount: record.likeCount + 1, isLiked: true }
-            : record
-        )
-      );
+      const record = records.find((r) => r._id === recordId);
+      if (record.isLiked) {
+        // Unlike
+        await recordsService.unlike(recordId);
+        setRecords((prevRecords) =>
+          prevRecords.map((r) =>
+            r._id === recordId
+              ? { ...r, likeCount: r.likeCount - 1, isLiked: false }
+              : r
+          )
+        );
+      } else {
+        // Like
+        await recordsService.like(recordId);
+        setRecords((prevRecords) =>
+          prevRecords.map((r) =>
+            r._id === recordId
+              ? { ...r, likeCount: r.likeCount + 1, isLiked: true }
+              : r
+          )
+        );
+      }
     } catch (err) {
-      console.error("Error liking record:", err);
+      console.error("Error toggling like:", err);
     }
   };
 
@@ -387,7 +401,7 @@ const WorldRecords = () => {
                         <Tooltip
                           title={
                             record.isLiked
-                              ? "You've already liked this"
+                              ? "Click to unlike"
                               : "Like this record"
                           }
                         >

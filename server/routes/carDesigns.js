@@ -20,4 +20,7 @@ router.post("/", carDesignsController.createCarDesign);
 // Like a car design
 router.post("/:id/like", carDesignsController.likeCarDesign);
 
+// Unlike a car design
+router.delete("/:id/like", carDesignsController.unlikeCarDesign);
+
 module.exports = router;

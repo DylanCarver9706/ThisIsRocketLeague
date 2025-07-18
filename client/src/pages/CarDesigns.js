@@ -62,21 +62,31 @@ const CarDesigns = () => {
 
   const handleLike = async (id) => {
     try {
-      await carDesignsService.likeCarDesign(id);
-      setCarDesigns((prevCarDesigns) =>
-        prevCarDesigns.map((carDesign) =>
-          carDesign._id === id
-            ? {
-                ...carDesign,
-                likeCount: carDesign.likeCount + 1,
-                isLiked: true,
-              }
-            : carDesign
-        )
-      );
+      const carDesign = carDesigns.find((c) => c._id === id);
+      if (carDesign.isLiked) {
+        // Unlike
+        await carDesignsService.unlikeCarDesign(id);
+        setCarDesigns((prevCarDesigns) =>
+          prevCarDesigns.map((c) =>
+            c._id === id
+              ? { ...c, likeCount: c.likeCount - 1, isLiked: false }
+              : c
+          )
+        );
+      } else {
+        // Like
+        await carDesignsService.likeCarDesign(id);
+        setCarDesigns((prevCarDesigns) =>
+          prevCarDesigns.map((c) =>
+            c._id === id
+              ? { ...c, likeCount: c.likeCount + 1, isLiked: true }
+              : c
+          )
+        );
+      }
     } catch (err) {
-      console.error("Error liking car design:", err);
-      setError("Failed to like car design");
+      console.error("Error toggling like:", err);
+      setError("Failed to toggle like");
     }
   };
 
