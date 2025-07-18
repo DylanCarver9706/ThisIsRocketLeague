@@ -275,3 +275,4 @@ class TermsService {
 }
 
 module.exports = new TermsService();
+ 

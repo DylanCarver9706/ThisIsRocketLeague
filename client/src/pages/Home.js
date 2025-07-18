@@ -83,67 +83,164 @@ const Home = () => {
   return (
     <Box className="min-h-screen">
       {/* Hero Section */}
+      {/* Desktop Hero Section */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #FF6B35 0%, #1E3A8A 100%)",
+          display: { xs: "none", md: "block" }, // Hide on mobile
+          position: "relative",
           color: "white",
-          py: 8,
+          py: 20,
           mb: 6,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1,
+          },
         }}
       >
-        <Container maxWidth="lg">
+        {/* YouTube Video Background - Desktop */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "100vw",
+            height: "56.25vw", // 16:9 aspect ratio
+            minHeight: "100%",
+            zIndex: 0,
+          }}
+        >
+          <iframe
+            src="https://www.youtube.com/embed/nqS4lVudH1Q?autoplay=1&mute=1&loop=1&playlist=nqS4lVudH1Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+            title="Rocket League Background Video"
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              objectFit: "cover",
+            }}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        </Box>
+
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
               <Typography
                 variant="h2"
                 component="h1"
                 gutterBottom
-                sx={{ fontWeight: "bold" }}
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
+                  fontSize: "3.75rem",
+                  textAlign: "left",
+                }}
               >
                 This Is Rocket League
               </Typography>
-              <Typography variant="h5" sx={{ mb: 3, opacity: 0.9 }}>
-                Your ultimate guide to Rocket League terminology and world
-                records
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 3,
+                  opacity: 0.9,
+                  fontSize: "1.5rem",
+                  textAlign: "left",
+                  lineHeight: 1.2,
+                }}
+              >
+                The community guide to Rocket League terminology, world records,
+                and more!
               </Typography>
-              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                <Button
-                  component={Link}
-                  to="/dictionary"
-                  variant="contained"
-                  size="large"
-                  startIcon={<BookIcon />}
-                  sx={{
-                    backgroundColor: "white",
-                    color: "primary.main",
-                    "&:hover": { backgroundColor: "grey.100" },
-                  }}
-                >
-                  Explore Dictionary
-                </Button>
-                <Button
-                  component={Link}
-                  to="/world-records"
-                  variant="outlined"
-                  size="large"
-                  startIcon={<TrophyIcon />}
-                  sx={{
-                    borderColor: "white",
-                    color: "white",
-                    "&:hover": {
-                      borderColor: "white",
-                      backgroundColor: "rgba(255,255,255,0.1)",
-                    },
-                  }}
-                >
-                  View Records
-                </Button>
-              </Box>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ textAlign: "center" }}>
-                <TrophyIcon sx={{ fontSize: 120, opacity: 0.8 }} />
-              </Box>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Mobile Hero Section */}
+      <Box
+        sx={{
+          display: { xs: "block", md: "none" }, // Show only on mobile
+          position: "relative",
+          color: "white",
+          py: 12,
+          mb: 3,
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            zIndex: 1,
+          },
+        }}
+      >
+        {/* YouTube Video Background - Mobile */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "177.78vh", // 16:9 aspect ratio based on viewport height (16/9 = 1.7778)
+            height: "100vh",
+            zIndex: 0,
+          }}
+        >
+          <iframe
+            src="https://www.youtube.com/embed/nqS4lVudH1Q?autoplay=1&mute=1&loop=1&playlist=nqS4lVudH1Q&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+            title="Rocket League Background Video"
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              objectFit: "cover",
+            }}
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        </Box>
+
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12}>
+              <Typography
+                variant="h2"
+                component="h1"
+                gutterBottom
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
+                  fontSize: "2rem",
+                  textAlign: "center",
+                }}
+              >
+                This Is Rocket League
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 3,
+                  opacity: 0.9,
+                  fontSize: "1rem",
+                  textAlign: "center",
+                  lineHeight: 1.4,
+                }}
+              >
+                The community guide to Rocket League terminology, world records,
+                and more!
+              </Typography>
             </Grid>
           </Grid>
         </Container>
@@ -164,7 +261,7 @@ const Home = () => {
                   color="text.secondary"
                   sx={{ mb: 2 }}
                 >
-                  Learn Rocket League terms and mechanics
+                  Terms and mechanics
                 </Typography>
                 <Button
                   component={Link}
@@ -192,6 +289,60 @@ const Home = () => {
                   sx={{ mb: 2 }}
                 >
                   Discover amazing achievements
+                </Typography>
+                <Button
+                  component={Link}
+                  to="/world-records"
+                  variant="outlined"
+                  fullWidth
+                >
+                  View Records
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: "100%", textAlign: "center" }}>
+              <CardContent>
+                <TrophyIcon
+                  sx={{ fontSize: 48, color: "primary.main", mb: 2 }}
+                />
+                <Typography variant="h6" gutterBottom>
+                  Car Designs
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  Check out the coolest car designs
+                </Typography>
+                <Button
+                  component={Link}
+                  to="/world-records"
+                  variant="outlined"
+                  fullWidth
+                >
+                  View Records
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: "100%", textAlign: "center" }}>
+              <CardContent>
+                <TrophyIcon
+                  sx={{ fontSize: 48, color: "primary.main", mb: 2 }}
+                />
+                <Typography variant="h6" gutterBottom>
+                  Plugins
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  See the most popular plugins
                 </Typography>
                 <Button
                   component={Link}

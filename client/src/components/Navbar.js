@@ -107,7 +107,6 @@ const Navbar = () => {
               gap: 1,
             }}
           >
-            <GameIcon />
             This Is Rocket League
           </Typography>
 
