@@ -89,7 +89,7 @@ const Home = () => {
           display: { xs: "none", md: "block" }, // Hide on mobile
           position: "relative",
           color: "white",
-          py: 20,
+          py: 25,
           mb: 6,
           overflow: "hidden",
           "&::before": {
@@ -131,9 +131,9 @@ const Home = () => {
           />
         </Box>
 
-        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+        <Container maxWidth="xl" sx={{ position: "relative", zIndex: 2 }}>
           <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Typography
                 variant="h2"
                 component="h1"
@@ -143,6 +143,7 @@ const Home = () => {
                   color: "primary.main",
                   fontSize: "3.75rem",
                   textAlign: "left",
+                  whiteSpace: "nowrap",
                 }}
               >
                 This Is Rocket League
