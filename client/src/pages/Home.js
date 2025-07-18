@@ -16,7 +16,6 @@ import {
   TrendingUp as TrendingIcon,
   Book as BookIcon,
   EmojiEvents as TrophyIcon,
-  Add as AddIcon,
   ThumbUp as LikeIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
@@ -201,56 +200,6 @@ const Home = () => {
                   fullWidth
                 >
                   View Records
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: "100%", textAlign: "center" }}>
-              <CardContent>
-                <AddIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Submit Term
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
-                  Add new terms to our dictionary
-                </Typography>
-                <Button
-                  component={Link}
-                  to="/submit-term"
-                  variant="outlined"
-                  fullWidth
-                >
-                  Submit Term
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ height: "100%", textAlign: "center" }}>
-              <CardContent>
-                <AddIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Submit Record
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
-                  Share your achievements
-                </Typography>
-                <Button
-                  component={Link}
-                  to="/submit-record"
-                  variant="outlined"
-                  fullWidth
-                >
-                  Submit Record
                 </Button>
               </CardContent>
             </Card>
