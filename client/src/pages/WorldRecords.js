@@ -46,7 +46,7 @@ const WorldRecords = () => {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [likedRecords, setLikedRecords] = useState(new Set());
+
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [submitForm, setSubmitForm] = useState({
     title: "",
@@ -90,11 +90,10 @@ const WorldRecords = () => {
       setRecords((prevRecords) =>
         prevRecords.map((record) =>
           record._id === recordId
-            ? { ...record, likeCount: record.likeCount + 1 }
+            ? { ...record, likeCount: record.likeCount + 1, isLiked: true }
             : record
         )
       );
-      setLikedRecords((prev) => new Set([...prev, recordId]));
     } catch (err) {
       console.error("Error liking record:", err);
     }
@@ -387,7 +386,7 @@ const WorldRecords = () => {
                       >
                         <Tooltip
                           title={
-                            likedRecords.has(record._id)
+                            record.isLiked
                               ? "You've already liked this"
                               : "Like this record"
                           }
@@ -395,12 +394,7 @@ const WorldRecords = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleLike(record._id)}
-                            disabled={likedRecords.has(record._id)}
-                            color={
-                              likedRecords.has(record._id)
-                                ? "primary"
-                                : "default"
-                            }
+                            color={record.isLiked ? "primary" : "default"}
                           >
                             <LikeIcon fontSize="small" />
                           </IconButton>

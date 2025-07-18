@@ -44,7 +44,7 @@ const Dictionary = () => {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [likedTerms, setLikedTerms] = useState(new Set());
+
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [submitForm, setSubmitForm] = useState({
     term: "",
@@ -87,11 +87,10 @@ const Dictionary = () => {
       setTerms((prevTerms) =>
         prevTerms.map((term) =>
           term._id === termId
-            ? { ...term, likeCount: term.likeCount + 1 }
+            ? { ...term, likeCount: term.likeCount + 1, isLiked: true }
             : term
         )
       );
-      setLikedTerms((prev) => new Set([...prev, termId]));
     } catch (err) {
       console.error("Error liking term:", err);
     }
@@ -383,7 +382,7 @@ const Dictionary = () => {
                       >
                         <Tooltip
                           title={
-                            likedTerms.has(term._id)
+                            term.isLiked
                               ? "You've already liked this"
                               : "Like this term"
                           }
@@ -391,10 +390,7 @@ const Dictionary = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleLike(term._id)}
-                            disabled={likedTerms.has(term._id)}
-                            color={
-                              likedTerms.has(term._id) ? "primary" : "default"
-                            }
+                            color={term.isLiked ? "primary" : "default"}
                           >
                             <LikeIcon fontSize="small" />
                           </IconButton>

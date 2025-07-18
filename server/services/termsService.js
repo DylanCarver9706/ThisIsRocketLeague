@@ -1,5 +1,9 @@
 const { collections } = require("../database/mongoCollections");
-const { createMongoDocument } = require("../database/middlewares/mongo");
+const {
+  createMongoDocument,
+  updateMongoDocument,
+} = require("../database/middlewares/mongo");
+const { ObjectId } = require("mongodb");
 
 class TermsService {
   // Get all terms with filtering and pagination (only published)
@@ -12,6 +16,7 @@ class TermsService {
         limit = 50,
         page = 1,
         search,
+        clientId,
       } = params;
 
       // Build filter object - only show published terms
@@ -57,9 +62,15 @@ class TermsService {
         collections.termsCollection.countDocuments(filter),
       ]);
 
+      // Add isLiked field to each term if clientId is provided
+      const termsWithLikeStatus = terms.map((term) => ({
+        ...term,
+        isLiked: clientId ? term.likedBy?.includes(clientId) || false : false,
+      }));
+
       return {
         success: true,
-        data: terms,
+        data: termsWithLikeStatus,
         count: totalCount,
         page: parseInt(page),
         totalPages: Math.ceil(totalCount / parseInt(limit)),
@@ -153,13 +164,17 @@ class TermsService {
         throw new Error("You have already liked this term");
       }
 
-      // Add like
-      await collections.termsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        {
-          $push: { likedBy: clientId },
-          $inc: { likeCount: 1 },
-        }
+      // Add like using updateMongoDocument
+      const updateData = {
+        $push: { likedBy: clientId },
+        $inc: { likeCount: 1 },
+      };
+
+      await updateMongoDocument(
+        collections.termsCollection,
+        id,
+        updateData,
+        false
       );
 
       return {

@@ -4,7 +4,9 @@ class RecordsController {
   // Get all records with filtering and pagination
   async getAllRecords(req, res) {
     try {
-      const result = await recordsService.getAllRecords(req.query);
+      const clientId = req.headers["x-client-id"];
+      const params = { ...req.query, clientId };
+      const result = await recordsService.getAllRecords(params);
       res.json(result);
     } catch (error) {
       console.error("Controller error fetching records:", error);
@@ -58,7 +60,8 @@ class RecordsController {
   // Like a record
   async likeRecord(req, res) {
     try {
-      const clientId = req.ip || req.connection.remoteAddress;
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
       const result = await recordsService.likeRecord(req.params.id, clientId);
       res.json(result);
     } catch (error) {

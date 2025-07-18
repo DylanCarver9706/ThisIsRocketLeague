@@ -63,14 +63,16 @@ const CarDesigns = () => {
   const handleLike = async (id) => {
     try {
       await carDesignsService.likeCarDesign(id);
-      // Refresh the car designs to get updated like count
-      carDesignsService.fetchCarDesigns(
-        { sort, search },
-        page,
-        setCarDesigns,
-        setTotalPages,
-        setLoading,
-        setError
+      setCarDesigns((prevCarDesigns) =>
+        prevCarDesigns.map((carDesign) =>
+          carDesign._id === id
+            ? {
+                ...carDesign,
+                likeCount: carDesign.likeCount + 1,
+                isLiked: true,
+              }
+            : carDesign
+        )
       );
     } catch (err) {
       console.error("Error liking car design:", err);
@@ -266,11 +268,12 @@ const CarDesigns = () => {
                     <IconButton
                       size="small"
                       onClick={() => handleLike(carDesign._id)}
+                      color={carDesign.isLiked ? "primary" : "default"}
                     >
-                      {carDesign.likedBy?.includes(carDesign._id) ? (
-                        <LikeIcon color="error" />
+                      {carDesign.isLiked ? (
+                        <LikeIcon fontSize="small" />
                       ) : (
-                        <LikeBorderIcon />
+                        <LikeBorderIcon fontSize="small" />
                       )}
                     </IconButton>
                     <Typography variant="body2">

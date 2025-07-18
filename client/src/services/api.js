@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getClientId } from "../utils/clientId";
 
 const API_BASE_URL =
   process.env.REACT_APP_NODE_ENV === "production"
@@ -15,6 +16,9 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Add client ID to all requests for like tracking
+    const clientId = getClientId();
+    config.headers["X-Client-ID"] = clientId;
     return config;
   },
   (error) => {
@@ -67,4 +71,3 @@ export const healthAPI = {
 };
 
 export default api;
- 

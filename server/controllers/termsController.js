@@ -4,7 +4,9 @@ class TermsController {
   // Get all terms with filtering and pagination
   async getAllTerms(req, res) {
     try {
-      const result = await termsService.getAllTerms(req.query);
+      const clientId = req.headers["x-client-id"];
+      const params = { ...req.query, clientId };
+      const result = await termsService.getAllTerms(params);
       res.json(result);
     } catch (error) {
       console.error("Controller error fetching terms:", error);
@@ -58,7 +60,8 @@ class TermsController {
   // Like a term
   async likeTerm(req, res) {
     try {
-      const clientId = req.ip || req.connection.remoteAddress;
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
       const result = await termsService.likeTerm(req.params.id, clientId);
       res.json(result);
     } catch (error) {

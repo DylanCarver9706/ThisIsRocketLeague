@@ -8,7 +8,13 @@ class CarDesignsService {
   // Get all car designs with filtering and pagination (only published)
   async getAllCarDesigns(params = {}) {
     try {
-      const { sort = "newest", limit = 50, page = 1, search } = params;
+      const {
+        sort = "newest",
+        limit = 50,
+        page = 1,
+        search,
+        clientId,
+      } = params;
 
       // Build filter object - only show published car designs
       const filter = { status: "published" };
@@ -50,9 +56,17 @@ class CarDesignsService {
         collections.carDesignsCollection.countDocuments(filter),
       ]);
 
+      // Add isLiked field to each car design if clientId is provided
+      const carDesignsWithLikeStatus = carDesigns.map((carDesign) => ({
+        ...carDesign,
+        isLiked: clientId
+          ? carDesign.likedBy?.includes(clientId) || false
+          : false,
+      }));
+
       return {
         success: true,
-        data: carDesigns,
+        data: carDesignsWithLikeStatus,
         count: totalCount,
         page: parseInt(page),
         totalPages: Math.ceil(totalCount / parseInt(limit)),

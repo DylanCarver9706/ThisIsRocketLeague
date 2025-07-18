@@ -1,5 +1,9 @@
 const { collections } = require("../database/mongoCollections");
-const { createMongoDocument } = require("../database/middlewares/mongo");
+const {
+  createMongoDocument,
+  updateMongoDocument,
+} = require("../database/middlewares/mongo");
+const { ObjectId } = require("mongodb");
 
 class RecordsService {
   // Get all records with filtering and pagination (only published)
@@ -11,6 +15,7 @@ class RecordsService {
         limit = 50,
         page = 1,
         search,
+        clientId,
       } = params;
 
       // Build filter object - only show published records
@@ -58,9 +63,15 @@ class RecordsService {
         collections.recordsCollection.countDocuments(filter),
       ]);
 
+      // Add isLiked field to each record if clientId is provided
+      const recordsWithLikeStatus = records.map((record) => ({
+        ...record,
+        isLiked: clientId ? record.likedBy?.includes(clientId) || false : false,
+      }));
+
       return {
         success: true,
-        data: records,
+        data: recordsWithLikeStatus,
         count: totalCount,
         page: parseInt(page),
         totalPages: Math.ceil(totalCount / parseInt(limit)),
@@ -163,13 +174,17 @@ class RecordsService {
         throw new Error("You have already liked this record");
       }
 
-      // Add like
-      await collections.recordsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        {
-          $push: { likedBy: clientId },
-          $inc: { likeCount: 1 },
-        }
+      // Add like using updateMongoDocument
+      const updateData = {
+        $push: { likedBy: clientId },
+        $inc: { likeCount: 1 },
+      };
+
+      await updateMongoDocument(
+        collections.recordsCollection,
+        id,
+        updateData,
+        false
       );
 
       return {

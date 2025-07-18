@@ -4,7 +4,9 @@ class CarDesignsController {
   // Get all car designs with filtering and pagination
   async getAllCarDesigns(req, res) {
     try {
-      const result = await carDesignsService.getAllCarDesigns(req.query);
+      const clientId = req.headers["x-client-id"];
+      const params = { ...req.query, clientId };
+      const result = await carDesignsService.getAllCarDesigns(params);
       res.json(result);
     } catch (error) {
       console.error("Controller error fetching car designs:", error);
@@ -64,7 +66,8 @@ class CarDesignsController {
   // Like a car design
   async likeCarDesign(req, res) {
     try {
-      const clientId = req.ip || req.connection.remoteAddress;
+      const clientId =
+        req.headers["x-client-id"] || req.ip || req.connection.remoteAddress;
       const result = await carDesignsService.likeCarDesign(
         req.params.id,
         clientId
