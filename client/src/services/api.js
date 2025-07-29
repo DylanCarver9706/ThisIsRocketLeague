@@ -41,6 +41,7 @@ api.interceptors.response.use(
 export const termsAPI = {
   getAll: (params = {}) => api.get("/terms", { params }),
   getById: (id) => api.get(`/terms/${id}`),
+  getBySlug: (slug) => api.get(`/terms/slug/${slug}`),
   create: (data) => api.post("/terms", data),
   like: (id) => api.post(`/terms/${id}/like`),
   unlike: (id) => api.delete(`/terms/${id}/like`),

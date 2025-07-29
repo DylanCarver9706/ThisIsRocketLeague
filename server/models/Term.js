@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const termSchema = new mongoose.Schema(
   {
-    term: {
+    title: {
       type: String,
-      required: [true, "Term is required"],
+      required: [true, "Title is required"],
       trim: true,
-      maxlength: [100, "Term cannot exceed 100 characters"],
+      maxlength: [100, "Title cannot exceed 100 characters"],
     },
     definition: {
       type: String,

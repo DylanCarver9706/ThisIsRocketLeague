@@ -11,6 +11,9 @@ router.get("/categories/list", termsController.getCategories);
 // Get trending terms (top by likes)
 router.get("/trending/limit", termsController.getTrendingTerms);
 
+// Get a specific term by slug
+router.get("/slug/:slug", termsController.getTermBySlug);
+
 // Get a specific term by ID
 router.get("/:id", termsController.getTermById);
 
@@ -24,4 +27,3 @@ router.post("/:id/like", termsController.likeTerm);
 router.delete("/:id/like", termsController.unlikeTerm);
 
 module.exports = router;
- 

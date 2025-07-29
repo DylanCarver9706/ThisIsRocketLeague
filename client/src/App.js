@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Dictionary from "./pages/Dictionary";
+import TermDetail from "./pages/TermDetail";
 import WorldRecords from "./pages/WorldRecords";
 import Plugins from "./pages/Plugins";
 import CarDesigns from "./pages/CarDesigns";
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dictionary" element={<Dictionary />} />
+          <Route path="/dictionary/:slug" element={<TermDetail />} />
           <Route path="/world-records" element={<WorldRecords />} />
           <Route path="/plugins" element={<Plugins />} />
           <Route path="/car-designs" element={<CarDesigns />} />

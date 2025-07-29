@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -32,6 +33,7 @@ import {
 import { termsService } from "../services";
 
 const Dictionary = () => {
+  const navigate = useNavigate();
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +49,7 @@ const Dictionary = () => {
 
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [submitForm, setSubmitForm] = useState({
-    term: "",
+    title: "",
     definition: "",
     category: "",
     exampleUsage: "",
@@ -81,7 +83,8 @@ const Dictionary = () => {
     }
   };
 
-  const handleLike = async (termId) => {
+  const handleLike = async (termId, event) => {
+    event.stopPropagation(); // Prevent card click when clicking like button
     try {
       const term = terms.find((t) => t._id === termId);
       if (term.isLiked) {
@@ -110,6 +113,11 @@ const Dictionary = () => {
     }
   };
 
+  const handleCardClick = (term) => {
+    const termSlug = term.title.toLowerCase().replace(/\s+/g, "-");
+    navigate(`/dictionary/${termSlug}`);
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setPage(1);
@@ -121,7 +129,7 @@ const Dictionary = () => {
       setSubmitError(null);
 
       if (
-        !submitForm.term ||
+        !submitForm.title ||
         !submitForm.definition ||
         !submitForm.category ||
         !submitForm.exampleUsage ||
@@ -135,7 +143,7 @@ const Dictionary = () => {
 
       // Reset form and close dialog
       setSubmitForm({
-        term: "",
+        title: "",
         definition: "",
         category: "",
         exampleUsage: "",
@@ -324,7 +332,14 @@ const Dictionary = () => {
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: 3,
+                    },
                   }}
+                  onClick={() => handleCardClick(term)}
                 >
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box
@@ -340,7 +355,7 @@ const Dictionary = () => {
                         component="h3"
                         sx={{ fontWeight: "bold" }}
                       >
-                        {term.term}
+                        {term.title}
                       </Typography>
                       <Chip
                         label={term.skillLevel}
@@ -401,7 +416,7 @@ const Dictionary = () => {
                         >
                           <IconButton
                             size="small"
-                            onClick={() => handleLike(term._id)}
+                            onClick={(e) => handleLike(term._id, e)}
                             color={term.isLiked ? "primary" : "default"}
                           >
                             <LikeIcon fontSize="small" />
@@ -464,10 +479,10 @@ const Dictionary = () => {
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
             <TextField
-              label="Term"
-              value={submitForm.term}
+              label="Title"
+              value={submitForm.title}
               onChange={(e) =>
-                setSubmitForm({ ...submitForm, term: e.target.value })
+                setSubmitForm({ ...submitForm, title: e.target.value })
               }
               fullWidth
               required

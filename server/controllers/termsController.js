@@ -37,6 +37,26 @@ class TermsController {
     }
   }
 
+  // Get a specific term by slug
+  async getTermBySlug(req, res) {
+    try {
+      const result = await termsService.getTermBySlug(req.params.slug);
+      res.json(result);
+    } catch (error) {
+      console.error("Controller error fetching term by slug:", error);
+      if (error.message === "Term not found") {
+        return res.status(404).json({
+          success: false,
+          error: "Term not found",
+        });
+      }
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch term",
+      });
+    }
+  }
+
   // Create a new term
   async createTerm(req, res) {
     try {

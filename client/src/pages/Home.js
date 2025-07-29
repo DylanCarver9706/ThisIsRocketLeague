@@ -320,11 +320,11 @@ const Home = () => {
                 </Typography>
                 <Button
                   component={Link}
-                  to="/world-records"
+                  to="/car-designs"
                   variant="outlined"
                   fullWidth
                 >
-                  View Records
+                  View Designs
                 </Button>
               </CardContent>
             </Card>
@@ -347,11 +347,11 @@ const Home = () => {
                 </Typography>
                 <Button
                   component={Link}
-                  to="/world-records"
+                  to="/plugins"
                   variant="outlined"
                   fullWidth
                 >
-                  View Records
+                  View Plugins
                 </Button>
               </CardContent>
             </Card>
@@ -395,7 +395,7 @@ const Home = () => {
                         }}
                       >
                         <Typography variant="h6" component="h3">
-                          {term.term}
+                          {term.title}
                         </Typography>
                         <Chip
                           label={term.skillLevel}

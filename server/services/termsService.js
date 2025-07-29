@@ -25,7 +25,7 @@ class TermsService {
       if (skillLevel) filter.skillLevel = skillLevel;
       if (search) {
         filter.$or = [
-          { term: { $regex: search, $options: "i" } },
+          { title: { $regex: search, $options: "i" } },
           { definition: { $regex: search, $options: "i" } },
           { exampleUsage: { $regex: search, $options: "i" } },
         ];
@@ -100,11 +100,33 @@ class TermsService {
     }
   }
 
+  // Get a specific term by slug (only published)
+  async getTermBySlug(slug) {
+    try {
+      // Convert slug back to term name for comparison
+      const termName = slug.toLowerCase().replace(/-/g, " ");
+
+      const term = await collections.termsCollection.findOne({
+        title: { $regex: new RegExp(`^${termName}$`, "i") },
+        status: "published",
+      });
+
+      if (!term) {
+        throw new Error("Term not found");
+      }
+
+      return { success: true, data: term };
+    } catch (error) {
+      console.error("Error fetching term by slug:", error);
+      throw error;
+    }
+  }
+
   // Create a new term (defaults to review status)
   async createTerm(termData) {
     try {
       const {
-        term,
+        title,
         definition,
         category,
         exampleUsage,
@@ -113,12 +135,12 @@ class TermsService {
       } = termData;
 
       // Basic validation
-      if (!term || !definition || !category || !exampleUsage || !skillLevel) {
+      if (!title || !definition || !category || !exampleUsage || !skillLevel) {
         throw new Error("Missing required fields");
       }
 
       const newTerm = {
-        term,
+        title,
         definition,
         category,
         exampleUsage,
@@ -275,4 +297,3 @@ class TermsService {
 }
 
 module.exports = new TermsService();
- 

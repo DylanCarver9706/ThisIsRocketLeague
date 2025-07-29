@@ -24,6 +24,17 @@ export const termsService = {
     }
   },
 
+  // Get a specific term by slug
+  getBySlug: async (slug) => {
+    try {
+      const response = await termsAPI.getBySlug(slug);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching term by slug:", error);
+      throw error;
+    }
+  },
+
   // Create a new term
   create: async (termData) => {
     try {
@@ -112,4 +123,3 @@ export const termsService = {
     }
   },
 };
- 
