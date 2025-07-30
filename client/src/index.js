@@ -3,8 +3,17 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import posthog from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
 import "./index.css";
 import App from "./App";
+
+// Initialize PostHog
+// Replace 'YOUR_POSTHOG_API_KEY' with your actual PostHog API key
+// You can get this from your PostHog project settings
+posthog.init(process.env.REACT_APP_POSTHOG_KEY, {
+  api_host: process.env.REACT_APP_POSTHOG_HOST,
+});
 
 const theme = createTheme({
   palette: {
@@ -70,11 +79,13 @@ const theme = createTheme({
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
+    <PostHogProvider client={posthog}>
+      <BrowserRouter>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </PostHogProvider>
   </React.StrictMode>
 );
