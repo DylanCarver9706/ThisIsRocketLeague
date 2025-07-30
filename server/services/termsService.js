@@ -6,6 +6,29 @@ const {
 const { ObjectId } = require("mongodb");
 
 class TermsService {
+  // Extract tags from text and convert to structured format
+  extractTags(text) {
+    const tags = [];
+    const regex = /@([^@]+)@/g;
+    let match;
+    let position = 1;
+
+    while ((match = regex.exec(text)) !== null) {
+      const tagTitle = match[1].trim();
+      const tagSlug = tagTitle.toLowerCase().replace(/\s+/g, "-");
+
+      tags.push({
+        position: position,
+        tagTitle: tagTitle,
+        page: `/dictionary/${tagSlug}`,
+      });
+
+      position++;
+    }
+
+    return tags;
+  }
+
   // Get all terms with filtering and pagination (only published)
   async getAllTerms(params = {}) {
     try {
@@ -139,16 +162,46 @@ class TermsService {
         throw new Error("Missing required fields");
       }
 
+      // Process tags from definition and example usage
+      const definitionTags = this.extractTags(definition);
+      const exampleUsageTags = this.extractTags(exampleUsage);
+
+      // Combine and reindex tags
+      const allTags = [...definitionTags, ...exampleUsageTags].map(
+        (tag, index) => ({
+          ...tag,
+          position: index + 1,
+        })
+      );
+
+      // Convert @term@ format to @N@ format for storage
+      let processedDefinition = definition;
+      let processedExampleUsage = exampleUsage;
+
+      allTags.forEach((tag, index) => {
+        const position = index + 1;
+        const regex = new RegExp(`@${tag.tagTitle}@`, "g");
+        processedDefinition = processedDefinition.replace(
+          regex,
+          `@${position}@`
+        );
+        processedExampleUsage = processedExampleUsage.replace(
+          regex,
+          `@${position}@`
+        );
+      });
+
       const newTerm = {
         title,
-        definition,
+        definition: processedDefinition,
         category,
-        exampleUsage,
+        exampleUsage: processedExampleUsage,
         skillLevel,
         submittedBy: submittedBy || "Anonymous",
         status: "review", // Default to review status
         likeCount: 0,
         likedBy: [],
+        tags: allTags,
       };
 
       // Use the createMongoDocument middleware function

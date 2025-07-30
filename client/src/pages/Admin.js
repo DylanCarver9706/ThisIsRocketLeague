@@ -30,9 +30,9 @@ import {
   AdminPanelSettings as AdminIcon,
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
-  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import adminService from "../services/adminService";
+import TaggedText from "../components/TaggedText";
 
 const Admin = () => {
   const [adminKey, setAdminKey] = useState("");
@@ -107,24 +107,6 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = async (submission) => {
-    if (!window.confirm("Are you sure you want to delete this submission?")) {
-      return;
-    }
-
-    try {
-      // Determine type based on current tab
-      const typeMap = ["terms", "records", "carDesigns"];
-      const type = typeMap[currentTab];
-
-      await adminService.deleteSubmission(submission._id, type, adminKey);
-      fetchDashboardData();
-    } catch (err) {
-      console.error("Error deleting submission:", err);
-      setError("Failed to delete submission");
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case "published":
@@ -174,6 +156,7 @@ const Admin = () => {
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+              autoFocus
               sx={{ mb: 3 }}
             />
 
@@ -316,9 +299,12 @@ const Admin = () => {
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          {submission.definition || submission.description}
-                        </Typography>
+                        <TaggedText
+                          text={submission.definition || submission.description}
+                          tags={submission.tags}
+                          variant="body2"
+                          sx={{ mb: 1 }}
+                        />
                         {submission.image && (
                           <Box sx={{ mb: 1 }}>
                             <img
@@ -369,12 +355,6 @@ const Admin = () => {
                           </IconButton>
                         </>
                       )}
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDelete(submission)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
                     </Box>
                   </ListItemSecondaryAction>
                 </ListItem>

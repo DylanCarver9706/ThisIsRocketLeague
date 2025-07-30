@@ -21,6 +21,7 @@ import {
   CalendarToday as CalendarIcon,
 } from "@mui/icons-material";
 import { termsService } from "../services";
+import TaggedText from "../components/TaggedText";
 
 const TermDetail = () => {
   const { slug } = useParams();
@@ -215,12 +216,12 @@ const TermDetail = () => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
               Definition
             </Typography>
-            <Typography
+            <TaggedText
+              text={term.definition}
+              tags={term.tags}
               variant="body1"
               sx={{ fontSize: "1.1rem", lineHeight: 1.6 }}
-            >
-              {term.definition}
-            </Typography>
+            />
           </Box>
 
           {/* Example Usage */}
@@ -228,7 +229,9 @@ const TermDetail = () => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
               Example Usage
             </Typography>
-            <Typography
+            <TaggedText
+              text={`"${term.exampleUsage}"`}
+              tags={term.tags}
               variant="body1"
               sx={{
                 fontSize: "1.1rem",
@@ -240,9 +243,7 @@ const TermDetail = () => {
                 borderLeft: 4,
                 borderColor: "primary.main",
               }}
-            >
-              "{term.exampleUsage}"
-            </Typography>
+            />
           </Box>
 
           {/* Metadata */}

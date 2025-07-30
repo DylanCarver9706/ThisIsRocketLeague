@@ -163,3 +163,4 @@ class TermsController {
 }
 
 module.exports = new TermsController();
+ 

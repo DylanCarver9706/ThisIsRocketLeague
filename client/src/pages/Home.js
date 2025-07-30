@@ -20,6 +20,7 @@ import {
   Person as PersonIcon,
 } from "@mui/icons-material";
 import { termsService, recordsService } from "../services";
+import TaggedText from "../components/TaggedText";
 
 const Home = () => {
   const [trendingTerms, setTrendingTerms] = useState([]);
@@ -403,20 +404,20 @@ const Home = () => {
                           size="small"
                         />
                       </Box>
-                      <Typography
+                      <TaggedText
+                        text={term.definition}
+                        tags={term.tags}
                         variant="body2"
                         color="text.secondary"
                         sx={{ mb: 1 }}
-                      >
-                        {term.definition}
-                      </Typography>
-                      <Typography
+                      />
+                      <TaggedText
+                        text={`"${term.exampleUsage}"`}
+                        tags={term.tags}
                         variant="caption"
                         color="text.secondary"
                         sx={{ fontStyle: "italic" }}
-                      >
-                        "{term.exampleUsage}"
-                      </Typography>
+                      />
                       <Box
                         sx={{
                           display: "flex",

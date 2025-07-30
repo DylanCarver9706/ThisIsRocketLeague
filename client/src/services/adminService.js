@@ -80,20 +80,6 @@ class AdminService {
       throw error;
     }
   }
-
-  // Delete submission
-  async deleteSubmission(id, type, adminKey) {
-    try {
-      const response = await api.delete(`/admin/submissions/${type}/${id}`, {
-        headers: {
-          "x-admin-key": adminKey,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
 }
 
 const adminService = new AdminService();

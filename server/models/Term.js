@@ -54,6 +54,22 @@ const termSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    tags: [
+      {
+        position: {
+          type: Number,
+          required: true,
+        },
+        tagTitle: {
+          type: String,
+          required: true,
+        },
+        page: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

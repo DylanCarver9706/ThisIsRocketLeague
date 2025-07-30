@@ -23,6 +23,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -31,6 +35,7 @@ import {
   Book as BookIcon,
 } from "@mui/icons-material";
 import { termsService } from "../services";
+import TaggedText from "../components/TaggedText";
 
 const Dictionary = () => {
   const navigate = useNavigate();
@@ -58,10 +63,28 @@ const Dictionary = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [allTerms, setAllTerms] = useState([]);
+  const [tagSuggestions, setTagSuggestions] = useState([]);
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+  const [tagInputPosition, setTagInputPosition] = useState({
+    start: 0,
+    end: 0,
+  });
+  const [activeTagField, setActiveTagField] = useState(null);
 
   useEffect(() => {
     fetchCategories();
+    fetchAllTerms();
   }, []);
+
+  const fetchAllTerms = async () => {
+    try {
+      const response = await termsService.getAll({ limit: 1000 });
+      setAllTerms(response.data || []);
+    } catch (err) {
+      console.error("Error fetching all terms:", err);
+    }
+  };
 
   useEffect(() => {
     termsService.fetchTerms(
@@ -118,6 +141,90 @@ const Dictionary = () => {
     navigate(`/dictionary/${termSlug}`);
   };
 
+  const handleTagInput = (field, value, event) => {
+    const cursorPosition = event?.target?.selectionStart || value.length;
+    const textBeforeCursor = value.substring(0, cursorPosition);
+    const atIndex = textBeforeCursor.lastIndexOf("@");
+
+    if (atIndex !== -1) {
+
+      // Check if we're inside an existing @term@ tag by looking backwards
+      let isInsideExistingTag = false;
+      let searchIndex = atIndex - 1;
+
+      while (searchIndex >= 0) {
+        if (textBeforeCursor[searchIndex] === "@") {
+          // Found another "@", check if it's the start of a complete tag
+          const textBetween = textBeforeCursor.substring(
+            searchIndex + 1,
+            atIndex
+          );
+          if (textBetween.trim() !== "" && !textBetween.includes("@")) {
+            // This is a complete @term@ tag, so we're inside an existing tag
+            isInsideExistingTag = true;
+          }
+          break;
+        }
+        searchIndex--;
+      }
+
+      if (!isInsideExistingTag) {
+        // Check if we're in the middle of a @term@ tag
+        const afterAt = textBeforeCursor.substring(atIndex + 1);
+        const tagMatch = afterAt.match(/^([^@]+)@/);
+
+        if (!tagMatch) {
+          // Check if cursor is directly after "@" with no space
+          const textAfterAt = textBeforeCursor.substring(atIndex + 1);
+          const hasSpaceAfterAt = textAfterAt.trim() !== textAfterAt;
+
+          if (!hasSpaceAfterAt) {
+            // We're typing a new tag, show suggestions
+            const searchTerm = textBeforeCursor.substring(atIndex + 1);
+            const filteredTerms = allTerms.filter(
+              (term) =>
+                term.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                term.title.toLowerCase() !== searchTerm.toLowerCase()
+            );
+
+            setTagSuggestions(filteredTerms.slice(0, 5));
+            setShowTagSuggestions(true);
+            setTagInputPosition({ start: atIndex, end: cursorPosition });
+            setActiveTagField(field);
+          } else {
+            // There's a space after "@", don't show suggestions
+            setShowTagSuggestions(false);
+            setActiveTagField(null);
+          }
+        } else {
+          // We're inside a @term@ tag, don't show suggestions
+          setShowTagSuggestions(false);
+          setActiveTagField(null);
+        }
+      } else {
+        // We're inside an existing tag, don't show suggestions
+        setShowTagSuggestions(false);
+        setActiveTagField(null);
+      }
+    } else {
+      setShowTagSuggestions(false);
+      setActiveTagField(null);
+    }
+
+    setSubmitForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleTagSelect = (selectedTerm, field) => {
+    const currentValue = submitForm[field];
+    const beforeTag = currentValue.substring(0, tagInputPosition.start);
+    const afterTag = currentValue.substring(tagInputPosition.end);
+
+    const newValue = `${beforeTag}@${selectedTerm.title}@ ${afterTag}`;
+
+    setSubmitForm((prev) => ({ ...prev, [field]: newValue }));
+    setShowTagSuggestions(false);
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
     setPage(1);
@@ -137,6 +244,25 @@ const Dictionary = () => {
       ) {
         setSubmitError("Please fill in all required fields");
         return;
+      }
+
+      // Validate that all @term@ tags are properly formatted
+      const definitionTags = submitForm.definition.match(/@([^@]+)@/g) || [];
+      const exampleTags = submitForm.exampleUsage.match(/@([^@]+)@/g) || [];
+      const allTags = [...definitionTags, ...exampleTags];
+
+      if (allTags.length > 0) {
+        // Check that all tags have valid term names
+        const tagNames = allTags.map((tag) => tag.match(/@([^@]+)@/)[1].trim());
+        const validTagNames = allTerms.map((term) => term.title);
+
+        const invalidTags = tagNames.filter(
+          (tagName) => !validTagNames.includes(tagName)
+        );
+        if (invalidTags.length > 0) {
+          setSubmitError(`Invalid tag names: ${invalidTags.join(", ")}`);
+          return;
+        }
       }
 
       await termsService.create(submitForm);
@@ -364,21 +490,21 @@ const Dictionary = () => {
                       />
                     </Box>
 
-                    <Typography
+                    <TaggedText
+                      text={term.definition}
+                      tags={term.tags}
                       variant="body2"
                       color="text.secondary"
                       sx={{ mb: 2 }}
-                    >
-                      {term.definition}
-                    </Typography>
+                    />
 
-                    <Typography
+                    <TaggedText
+                      text={`"${term.exampleUsage}"`}
+                      tags={term.tags}
                       variant="caption"
                       color="text.secondary"
                       sx={{ fontStyle: "italic", display: "block", mb: 2 }}
-                    >
-                      "{term.exampleUsage}"
-                    </Typography>
+                    />
 
                     <Box
                       sx={{
@@ -487,17 +613,50 @@ const Dictionary = () => {
               fullWidth
               required
             />
-            <TextField
-              label="Definition"
-              value={submitForm.definition}
-              onChange={(e) =>
-                setSubmitForm({ ...submitForm, definition: e.target.value })
-              }
-              fullWidth
-              multiline
-              rows={3}
-              required
-            />
+            <Box sx={{ position: "relative" }}>
+              <TextField
+                label="Definition"
+                value={submitForm.definition}
+                onChange={(e) =>
+                  handleTagInput("definition", e.target.value, e)
+                }
+                fullWidth
+                multiline
+                rows={3}
+                required
+                helperText="Use @ to tag other terms"
+              />
+              {showTagSuggestions && activeTagField === "definition" && (
+                <Paper
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                    maxHeight: 200,
+                    overflow: "auto",
+                    boxShadow: 3,
+                  }}
+                >
+                  <List dense>
+                    {tagSuggestions.map((term) => (
+                      <ListItem
+                        key={term._id}
+                        button
+                        onClick={() => handleTagSelect(term, "definition")}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <ListItemText
+                          primary={term.title}
+                          secondary={term.definition.substring(0, 50) + "..."}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              )}
+            </Box>
             <FormControl fullWidth required>
               <InputLabel>Category</InputLabel>
               <Select
@@ -515,17 +674,50 @@ const Dictionary = () => {
                 <MenuItem value="Other">Other</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              label="Example Usage"
-              value={submitForm.exampleUsage}
-              onChange={(e) =>
-                setSubmitForm({ ...submitForm, exampleUsage: e.target.value })
-              }
-              fullWidth
-              multiline
-              rows={2}
-              required
-            />
+            <Box sx={{ position: "relative" }}>
+              <TextField
+                label="Example Usage"
+                value={submitForm.exampleUsage}
+                onChange={(e) =>
+                  handleTagInput("exampleUsage", e.target.value, e)
+                }
+                fullWidth
+                multiline
+                rows={2}
+                required
+                helperText="Use @ to tag other terms"
+              />
+              {showTagSuggestions && activeTagField === "exampleUsage" && (
+                <Paper
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                    maxHeight: 200,
+                    overflow: "auto",
+                    boxShadow: 3,
+                  }}
+                >
+                  <List dense>
+                    {tagSuggestions.map((term) => (
+                      <ListItem
+                        key={term._id}
+                        button
+                        onClick={() => handleTagSelect(term, "exampleUsage")}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <ListItemText
+                          primary={term.title}
+                          secondary={term.definition.substring(0, 50) + "..."}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              )}
+            </Box>
             <FormControl fullWidth required>
               <InputLabel>Skill Level</InputLabel>
               <Select
