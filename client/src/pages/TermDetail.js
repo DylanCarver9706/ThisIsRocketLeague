@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Container,
@@ -28,8 +28,11 @@ const TermDetail = () => {
   const [term, setTerm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+
     const fetchTerm = async () => {
       try {
         setLoading(true);
@@ -43,9 +46,8 @@ const TermDetail = () => {
       }
     };
 
-    if (slug) {
-      fetchTerm();
-    }
+    hasFetched.current = true;
+    fetchTerm();
   }, [slug]);
 
   const handleLike = async () => {
@@ -92,6 +94,8 @@ const TermDetail = () => {
       Strategy: "success",
       Tactics: "warning",
       Equipment: "info",
+      Stats: "error",
+      Items: "warning",
       Other: "default",
     };
     return colors[category] || "default";
