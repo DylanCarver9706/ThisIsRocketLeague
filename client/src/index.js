@@ -9,8 +9,6 @@ import "./index.css";
 import App from "./App";
 
 // Initialize PostHog
-// Replace 'YOUR_POSTHOG_API_KEY' with your actual PostHog API key
-// You can get this from your PostHog project settings
 posthog.init(process.env.REACT_APP_POSTHOG_KEY, {
   api_host: process.env.REACT_APP_POSTHOG_HOST,
 });

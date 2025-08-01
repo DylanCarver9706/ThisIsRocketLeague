@@ -37,12 +37,22 @@ import {
 import { termsService } from "../services";
 import TaggedText from "../components/TaggedText";
 
+const categories = [
+  "Mechanics",
+  "Slang",
+  "Strategy",
+  "Tactics",
+  "Equipment",
+  "Stats",
+  "Items",
+  "Other",
+];
+
 const Dictionary = () => {
   const navigate = useNavigate();
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -63,7 +73,6 @@ const Dictionary = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [allTerms, setAllTerms] = useState([]);
   const [tagSuggestions, setTagSuggestions] = useState([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [tagInputPosition, setTagInputPosition] = useState({
@@ -73,21 +82,7 @@ const Dictionary = () => {
   const [activeTagField, setActiveTagField] = useState(null);
 
   useEffect(() => {
-    fetchCategories();
-    fetchAllTerms();
-  }, []);
-
-  const fetchAllTerms = async () => {
-    try {
-      const response = await termsService.getAll({ limit: 1000 });
-      setAllTerms(response.data || []);
-    } catch (err) {
-      console.error("Error fetching all terms:", err);
-    }
-  };
-
-  useEffect(() => {
-    termsService.fetchTerms(
+    const { terms, totalPages } = termsService.fetchTerms(
       filters,
       page,
       setTerms,
@@ -95,16 +90,9 @@ const Dictionary = () => {
       setLoading,
       setError
     );
+    setTerms(terms);
+    setTotalPages(totalPages);
   }, [filters, page]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await termsService.getCategories();
-      setCategories(response.data || []);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
 
   const handleLike = async (termId, event) => {
     event.stopPropagation(); // Prevent card click when clicking like button
@@ -147,7 +135,6 @@ const Dictionary = () => {
     const atIndex = textBeforeCursor.lastIndexOf("@");
 
     if (atIndex !== -1) {
-
       // Check if we're inside an existing @term@ tag by looking backwards
       let isInsideExistingTag = false;
       let searchIndex = atIndex - 1;
@@ -181,7 +168,7 @@ const Dictionary = () => {
           if (!hasSpaceAfterAt) {
             // We're typing a new tag, show suggestions
             const searchTerm = textBeforeCursor.substring(atIndex + 1);
-            const filteredTerms = allTerms.filter(
+            const filteredTerms = terms.filter(
               (term) =>
                 term.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 term.title.toLowerCase() !== searchTerm.toLowerCase()
@@ -254,7 +241,7 @@ const Dictionary = () => {
       if (allTags.length > 0) {
         // Check that all tags have valid term names
         const tagNames = allTags.map((tag) => tag.match(/@([^@]+)@/)[1].trim());
-        const validTagNames = allTerms.map((term) => term.title);
+        const validTagNames = terms.map((term) => term.title);
 
         const invalidTags = tagNames.filter(
           (tagName) => !validTagNames.includes(tagName)
@@ -308,6 +295,8 @@ const Dictionary = () => {
       Strategy: "success",
       Tactics: "warning",
       Equipment: "info",
+      Stats: "error",
+      Items: "warning",
       Other: "default",
     };
     return colors[category] || "default";
@@ -671,6 +660,8 @@ const Dictionary = () => {
                 <MenuItem value="Strategy">Strategy</MenuItem>
                 <MenuItem value="Tactics">Tactics</MenuItem>
                 <MenuItem value="Equipment">Equipment</MenuItem>
+                <MenuItem value="Stats">Stats</MenuItem>
+                <MenuItem value="Items">Items</MenuItem>
                 <MenuItem value="Other">Other</MenuItem>
               </Select>
             </FormControl>

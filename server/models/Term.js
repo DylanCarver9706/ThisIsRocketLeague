@@ -17,7 +17,16 @@ const termSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Category is required"],
-      enum: ["Mechanics", "Slang", "Strategy", "Tactics", "Equipment", "Other"],
+      enum: [
+        "Mechanics",
+        "Slang",
+        "Strategy",
+        "Tactics",
+        "Equipment",
+        "Stats",
+        "Items",
+        "Other",
+      ],
       default: "Other",
     },
     exampleUsage: {

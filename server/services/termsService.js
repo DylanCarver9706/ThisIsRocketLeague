@@ -323,30 +323,6 @@ class TermsService {
       throw error;
     }
   }
-
-  // Get categories (only from published terms)
-  async getCategories() {
-    try {
-      const categories = await collections.termsCollection
-        .aggregate([
-          { $match: { status: "published" } },
-          { $group: { _id: "$category" } },
-          { $sort: { _id: 1 } },
-        ])
-        .toArray();
-
-      const categoryList = categories.map((cat) => cat._id);
-
-      return {
-        success: true,
-        data: categoryList,
-        count: categoryList.length,
-      };
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  }
 }
 
 module.exports = new TermsService();

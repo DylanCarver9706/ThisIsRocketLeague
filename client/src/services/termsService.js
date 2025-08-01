@@ -80,18 +80,6 @@ export const termsService = {
     }
   },
 
-  // Get categories
-  getCategories: async () => {
-    try {
-      const response = await termsAPI.getCategories();
-      // Server returns { success: true, data: [...], count: 10 }
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  },
-
   // Fetch terms with state management
   fetchTerms: async (
     filters,

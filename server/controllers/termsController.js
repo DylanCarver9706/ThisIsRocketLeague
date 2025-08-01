@@ -146,20 +146,6 @@ class TermsController {
       });
     }
   }
-
-  // Get categories
-  async getCategories(req, res) {
-    try {
-      const result = await termsService.getCategories();
-      res.json(result);
-    } catch (error) {
-      console.error("Controller error fetching categories:", error);
-      res.status(500).json({
-        success: false,
-        error: "Failed to fetch categories",
-      });
-    }
-  }
 }
 
 module.exports = new TermsController();

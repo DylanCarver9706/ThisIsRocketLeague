@@ -5,9 +5,6 @@ const termsController = require("../controllers/termsController");
 // Get all terms with optional filtering and sorting
 router.get("/", termsController.getAllTerms);
 
-// Get categories - FIXED: This was missing and causing 404 errors
-router.get("/categories/list", termsController.getCategories);
-
 // Get trending terms (top by likes)
 router.get("/trending/limit", termsController.getTrendingTerms);
 
