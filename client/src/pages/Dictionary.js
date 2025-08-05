@@ -456,62 +456,80 @@ const Dictionary = () => {
                   }}
                   onClick={() => handleCardClick(term)}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
                     <Box
                       sx={{
+                        flexGrow: 1,
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 2,
+                        flexDirection: "column",
                       }}
                     >
-                      <Typography
-                        variant="h6"
-                        component="h3"
-                        sx={{ fontWeight: "bold" }}
+                      <Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            mb: 2,
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            component="h3"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            {term.title}
+                          </Typography>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <Chip
+                              label={term.category}
+                              color={getCategoryColor(term.category)}
+                              size="small"
+                              variant="outlined"
+                            />
+                            <Chip
+                              label={term.skillLevel}
+                              color={getSkillLevelColor(term.skillLevel)}
+                              size="small"
+                            />
+                          </Box>
+                        </Box>
+
+                        <TaggedText
+                          text={term.definition}
+                          tags={term.tags}
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 2 }}
+                        />
+                      </Box>
+
+                      <Box
+                        sx={{
+                          flexGrow: 1,
+                          mb: 2,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
                       >
-                        {term.title}
-                      </Typography>
-                      <Chip
-                        label={term.skillLevel}
-                        color={getSkillLevelColor(term.skillLevel)}
-                        size="small"
-                      />
-                    </Box>
-
-                    <TaggedText
-                      text={term.definition}
-                      tags={term.tags}
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TaggedText
-                      text={`"${term.exampleUsage}"`}
-                      tags={term.tags}
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ fontStyle: "italic", display: "block", mb: 2 }}
-                    />
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Chip
-                        label={term.category}
-                        color={getCategoryColor(term.category)}
-                        size="small"
-                        variant="outlined"
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        by {term.submittedBy}
-                      </Typography>
+                        <TaggedText
+                          text={`"${term.exampleUsage}"`}
+                          tags={term.tags}
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            fontStyle: "italic",
+                            display: "block",
+                            fontWeight: "bold",
+                          }}
+                        />
+                      </Box>
                     </Box>
 
                     <Box
@@ -519,6 +537,7 @@ const Dictionary = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        mt: "auto",
                       }}
                     >
                       <Box
@@ -530,19 +549,19 @@ const Dictionary = () => {
                           }
                         >
                           <IconButton
-                            size="small"
+                            size="medium"
                             onClick={(e) => handleLike(term._id, e)}
                             color={term.isLiked ? "primary" : "default"}
                           >
-                            <LikeIcon fontSize="small" />
+                            <LikeIcon fontSize="medium" />
                           </IconButton>
                         </Tooltip>
-                        <Typography variant="caption">
+                        <Typography variant="body2">
                           {term.likeCount} likes
                         </Typography>
                       </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(term.createdAt).toLocaleDateString()}
+                      <Typography variant="body2" color="text.secondary">
+                        Submitted by: {term.submittedBy}
                       </Typography>
                     </Box>
                   </CardContent>
