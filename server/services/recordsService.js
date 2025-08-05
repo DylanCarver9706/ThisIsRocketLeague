@@ -10,7 +10,6 @@ class RecordsService {
   async getAllRecords(params = {}) {
     try {
       const {
-        category,
         sort = "newest",
         limit = 50,
         page = 1,
@@ -20,7 +19,6 @@ class RecordsService {
 
       // Build filter object - only show published records
       const filter = { status: "published" };
-      if (category) filter.category = category;
       if (search) {
         filter.$or = [
           { title: { $regex: search, $options: "i" } },
@@ -101,13 +99,40 @@ class RecordsService {
     }
   }
 
+  // Get a specific record by slug (only published)
+  async getRecordBySlug(slug, clientId) {
+    try {
+      // Convert slug back to record title for comparison
+      const recordTitle = slug.toLowerCase().replace(/-/g, " ");
+
+      const record = await collections.recordsCollection.findOne({
+        title: { $regex: new RegExp(`^${recordTitle}$`, "i") },
+        status: "published",
+      });
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      // Add isLiked field if clientId is provided
+      const recordWithLikeStatus = {
+        ...record,
+        isLiked: clientId ? record.likedBy?.includes(clientId) || false : false,
+      };
+
+      return { success: true, data: recordWithLikeStatus };
+    } catch (error) {
+      console.error("Error fetching record by slug:", error);
+      throw error;
+    }
+  }
+
   // Create a new record (defaults to review status)
   async createRecord(recordData) {
     try {
       const {
         title,
         description,
-        category,
         recordHolderName,
         proofUrl,
         dateAchieved,
@@ -118,7 +143,6 @@ class RecordsService {
       if (
         !title ||
         !description ||
-        !category ||
         !recordHolderName ||
         !proofUrl ||
         !dateAchieved
@@ -129,7 +153,6 @@ class RecordsService {
       const newRecord = {
         title,
         description,
-        category,
         recordHolderName,
         proofUrl,
         dateAchieved: new Date(dateAchieved),
@@ -255,30 +278,6 @@ class RecordsService {
       };
     } catch (error) {
       console.error("Error fetching trending records:", error);
-      throw error;
-    }
-  }
-
-  // Get categories (only from published records)
-  async getCategories() {
-    try {
-      const categories = await collections.recordsCollection
-        .aggregate([
-          { $match: { status: "published" } },
-          { $group: { _id: "$category" } },
-          { $sort: { _id: 1 } },
-        ])
-        .toArray();
-
-      const categoryList = categories.map((cat) => cat._id);
-
-      return {
-        success: true,
-        data: categoryList,
-        count: categoryList.length,
-      };
-    } catch (error) {
-      console.error("Error fetching categories:", error);
       throw error;
     }
   }

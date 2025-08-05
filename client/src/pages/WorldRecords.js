@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -7,7 +8,6 @@ import {
   CardContent,
   Button,
   Box,
-  Chip,
   TextField,
   FormControl,
   InputLabel,
@@ -35,13 +35,12 @@ import {
 import { recordsService } from "../services";
 
 const WorldRecords = () => {
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     search: "",
-    category: "",
     sort: "newest",
   });
   const [page, setPage] = useState(1);
@@ -51,7 +50,6 @@ const WorldRecords = () => {
   const [submitForm, setSubmitForm] = useState({
     title: "",
     description: "",
-    category: "",
     recordHolderName: "",
     proofUrl: "",
     dateAchieved: "",
@@ -59,10 +57,6 @@ const WorldRecords = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   useEffect(() => {
     recordsService.fetchRecords(
@@ -74,15 +68,6 @@ const WorldRecords = () => {
       setError
     );
   }, [filters, page]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await recordsService.getCategories();
-      setCategories(response.data || []);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
 
   const handleLike = async (recordId) => {
     try {
@@ -118,6 +103,11 @@ const WorldRecords = () => {
     setPage(1);
   };
 
+  const handleCardClick = (record) => {
+    const recordSlug = record.title.toLowerCase().replace(/\s+/g, "-");
+    navigate(`/world-records/${recordSlug}`);
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
@@ -126,7 +116,6 @@ const WorldRecords = () => {
       if (
         !submitForm.title ||
         !submitForm.description ||
-        !submitForm.category ||
         !submitForm.recordHolderName ||
         !submitForm.proofUrl ||
         !submitForm.dateAchieved
@@ -141,7 +130,6 @@ const WorldRecords = () => {
       setSubmitForm({
         title: "",
         description: "",
-        category: "",
         recordHolderName: "",
         proofUrl: "",
         dateAchieved: "",
@@ -157,20 +145,6 @@ const WorldRecords = () => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const getCategoryColor = (category) => {
-    const colors = {
-      "Fastest Goal": "error",
-      "Longest Air Dribble": "primary",
-      "Highest MMR": "success",
-      "Most Goals in Match": "warning",
-      "Longest Win Streak": "info",
-      "Fastest Aerial Goal": "secondary",
-      "Most Saves in Match": "default",
-      Other: "default",
-    };
-    return colors[category] || "default";
   };
 
   const formatDate = (dateString) => {
@@ -232,25 +206,7 @@ const WorldRecords = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={filters.category}
-                  label="Category"
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                >
-                  <MenuItem value="">All Categories</MenuItem>
-                  {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>Sort By</InputLabel>
@@ -271,9 +227,7 @@ const WorldRecords = () => {
               <Button
                 variant="outlined"
                 fullWidth
-                onClick={() =>
-                  setFilters({ search: "", category: "", sort: "newest" })
-                }
+                onClick={() => setFilters({ search: "", sort: "newest" })}
               >
                 Clear Filters
               </Button>
@@ -304,72 +258,90 @@ const WorldRecords = () => {
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
+                    cursor: "pointer",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: 3,
+                    },
                   }}
+                  onClick={() => handleCardClick(record)}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 2,
-                      }}
-                    >
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Box sx={{ flexGrow: 1 }}>
                       <Typography
                         variant="h6"
                         component="h3"
-                        sx={{ fontWeight: "bold" }}
+                        sx={{ fontWeight: "bold", mb: 2 }}
                       >
                         {record.title}
                       </Typography>
-                      <Chip
-                        label={record.category}
-                        color={getCategoryColor(record.category)}
-                        size="small"
-                      />
-                    </Box>
 
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 2 }}
-                    >
-                      {record.description}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 2,
-                      }}
-                    >
-                      <PersonIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary">
-                        {record.recordHolderName}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 2,
-                      }}
-                    >
-                      <LinkIcon fontSize="small" color="action" />
-                      <MuiLink
-                        href={record.proofUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Typography
                         variant="body2"
-                        color="primary"
-                        sx={{ textDecoration: "none" }}
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
                       >
-                        View Proof
-                      </MuiLink>
+                        {record.description}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mb: 2,
+                        }}
+                      >
+                        <PersonIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary">
+                          Record holder:{" "}
+                          <strong>{record.recordHolderName}</strong>
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mb: 2,
+                        }}
+                      >
+                        <LinkIcon fontSize="small" color="action" />
+                        <MuiLink
+                          href={record.proofUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="body2"
+                          color="primary"
+                          sx={{ textDecoration: "none" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Watch on YouTube
+                        </MuiLink>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                          mb: 2,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          Achieved: {formatDate(record.dateAchieved)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Submitted by: {record.submittedBy}
+                        </Typography>
+                      </Box>
                     </Box>
 
                     <Box
@@ -377,22 +349,7 @@ const WorldRecords = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        Achieved: {formatDate(record.dateAchieved)}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        by {record.submittedBy}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        mt: "auto",
                       }}
                     >
                       <Box
@@ -406,20 +363,20 @@ const WorldRecords = () => {
                           }
                         >
                           <IconButton
-                            size="small"
-                            onClick={() => handleLike(record._id)}
+                            size="medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLike(record._id);
+                            }}
                             color={record.isLiked ? "primary" : "default"}
                           >
-                            <LikeIcon fontSize="small" />
+                            <LikeIcon fontSize="medium" />
                           </IconButton>
                         </Tooltip>
-                        <Typography variant="caption">
+                        <Typography variant="body2">
                           {record.likeCount} likes
                         </Typography>
                       </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(record.createdAt).toLocaleDateString()}
-                      </Typography>
                     </Box>
                   </CardContent>
                 </Card>
@@ -489,35 +446,6 @@ const WorldRecords = () => {
               rows={3}
               required
             />
-            <FormControl fullWidth required>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={submitForm.category}
-                label="Category"
-                onChange={(e) =>
-                  setSubmitForm({ ...submitForm, category: e.target.value })
-                }
-              >
-                <MenuItem value="Fastest Goal">Fastest Goal</MenuItem>
-                <MenuItem value="Longest Air Dribble">
-                  Longest Air Dribble
-                </MenuItem>
-                <MenuItem value="Highest MMR">Highest MMR</MenuItem>
-                <MenuItem value="Most Goals in Match">
-                  Most Goals in Match
-                </MenuItem>
-                <MenuItem value="Longest Win Streak">
-                  Longest Win Streak
-                </MenuItem>
-                <MenuItem value="Fastest Aerial Goal">
-                  Fastest Aerial Goal
-                </MenuItem>
-                <MenuItem value="Most Saves in Match">
-                  Most Saves in Match
-                </MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </Select>
-            </FormControl>
             <TextField
               label="Record Holder Name"
               value={submitForm.recordHolderName}
@@ -579,4 +507,3 @@ const WorldRecords = () => {
 };
 
 export default WorldRecords;
- 

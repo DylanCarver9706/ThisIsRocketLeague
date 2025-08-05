@@ -37,6 +37,30 @@ class RecordsController {
     }
   }
 
+  // Get a specific record by slug
+  async getRecordBySlug(req, res) {
+    try {
+      const clientId = req.headers["x-client-id"];
+      const result = await recordsService.getRecordBySlug(
+        req.params.slug,
+        clientId
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Controller error fetching record by slug:", error);
+      if (error.message === "Record not found") {
+        return res.status(404).json({
+          success: false,
+          error: "Record not found",
+        });
+      }
+      res.status(500).json({
+        success: false,
+        error: "Failed to fetch record",
+      });
+    }
+  }
+
   // Create a new record
   async createRecord(req, res) {
     try {
@@ -123,20 +147,6 @@ class RecordsController {
       res.status(500).json({
         success: false,
         error: "Failed to fetch trending records",
-      });
-    }
-  }
-
-  // Get categories
-  async getCategories(req, res) {
-    try {
-      const result = await recordsService.getCategories();
-      res.json(result);
-    } catch (error) {
-      console.error("Controller error fetching categories:", error);
-      res.status(500).json({
-        success: false,
-        error: "Failed to fetch categories",
       });
     }
   }

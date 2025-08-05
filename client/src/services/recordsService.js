@@ -23,6 +23,17 @@ export const recordsService = {
     }
   },
 
+  // Get a specific record by slug
+  getBySlug: async (slug) => {
+    try {
+      const response = await recordsAPI.getBySlug(slug);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching record by slug:", error);
+      throw error;
+    }
+  },
+
   // Create a new record
   create: async (recordData) => {
     try {
@@ -67,17 +78,6 @@ export const recordsService = {
     }
   },
 
-  // Get categories
-  getCategories: async () => {
-    try {
-      const response = await recordsAPI.getCategories();
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  },
-
   // Fetch records with state management
   fetchRecords: async (
     filters,
@@ -109,4 +109,3 @@ export const recordsService = {
     }
   },
 };
- 

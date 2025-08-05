@@ -8,26 +8,17 @@ const recordSchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, "Title cannot exceed 200 characters"],
     },
+    slug: {
+      type: String,
+      required: [true, "Slug is required"],
+      unique: true,
+      trim: true,
+    },
     description: {
       type: String,
       required: [true, "Description is required"],
       trim: true,
       maxlength: [1000, "Description cannot exceed 1000 characters"],
-    },
-    category: {
-      type: String,
-      required: [true, "Category is required"],
-      enum: [
-        "Fastest Goal",
-        "Longest Air Dribble",
-        "Highest MMR",
-        "Most Goals in Match",
-        "Longest Win Streak",
-        "Fastest Aerial Goal",
-        "Most Saves in Match",
-        "Other",
-      ],
-      default: "Other",
     },
     recordHolderName: {
       type: String,
@@ -91,6 +82,14 @@ recordSchema.virtual("trendingScore").get(function () {
   const daysSinceCreation =
     (Date.now() - this.createdAt) / (1000 * 60 * 60 * 24);
   return this.likeCount / (daysSinceCreation + 1); // Add 1 to avoid division by zero
+});
+
+// Pre-save middleware to generate slug from title
+recordSchema.pre("save", function (next) {
+  if (this.isModified("title") && !this.slug) {
+    this.slug = this.title.toLowerCase().replace(/\s+/g, "-");
+  }
+  next();
 });
 
 // Ensure virtuals are serialized

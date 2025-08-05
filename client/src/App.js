@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Dictionary from "./pages/Dictionary";
 import TermDetail from "./pages/TermDetail";
 import WorldRecords from "./pages/WorldRecords";
+import RecordDetail from "./pages/RecordDetail";
 import Plugins from "./pages/Plugins";
 import CarDesigns from "./pages/CarDesigns";
 import Admin from "./pages/Admin";
@@ -20,6 +21,7 @@ function App() {
           <Route path="/dictionary" element={<Dictionary />} />
           <Route path="/dictionary/:slug" element={<TermDetail />} />
           <Route path="/world-records" element={<WorldRecords />} />
+          <Route path="/world-records/:slug" element={<RecordDetail />} />
           <Route path="/plugins" element={<Plugins />} />
           <Route path="/car-designs" element={<CarDesigns />} />
           <Route path="/admin" element={<Admin />} />

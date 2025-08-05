@@ -53,12 +53,12 @@ export const termsAPI = {
 export const recordsAPI = {
   getAll: (params = {}) => api.get("/records", { params }),
   getById: (id) => api.get(`/records/${id}`),
+  getBySlug: (slug) => api.get(`/records/slug/${slug}`),
   create: (data) => api.post("/records", data),
   like: (id) => api.post(`/records/${id}/like`),
   unlike: (id) => api.delete(`/records/${id}/like`),
   getTrending: (limit = 10) =>
     api.get(`/records/trending/limit?limit=${limit}`),
-  getCategories: () => api.get("/records/categories/list"),
 };
 
 // Plugins API
