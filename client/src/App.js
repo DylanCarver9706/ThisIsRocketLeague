@@ -7,7 +7,7 @@ import Dictionary from "./pages/Dictionary";
 import TermDetail from "./pages/TermDetail";
 import WorldRecords from "./pages/WorldRecords";
 import RecordDetail from "./pages/RecordDetail";
-import Plugins from "./pages/Plugins";
+// import Plugins from "./pages/Plugins"; Deprecated for now due to prod instance not working, but dev will
 import CarDesigns from "./pages/CarDesigns";
 import Admin from "./pages/Admin";
 
@@ -22,7 +22,7 @@ function App() {
           <Route path="/dictionary/:slug" element={<TermDetail />} />
           <Route path="/world-records" element={<WorldRecords />} />
           <Route path="/world-records/:slug" element={<RecordDetail />} />
-          <Route path="/plugins" element={<Plugins />} />
+          {/* <Route path="/plugins" element={<Plugins />} /> Deprecated for now due to prod instance not working, but dev will */}
           <Route path="/car-designs" element={<CarDesigns />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>

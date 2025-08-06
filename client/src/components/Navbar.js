@@ -19,7 +19,7 @@ import {
   SportsEsports as GameIcon,
   Book as BookIcon,
   EmojiEvents as TrophyIcon,
-  Download as DownloadIcon,
+  // Download as DownloadIcon,
   DirectionsCar as CarIcon,
 } from "@mui/icons-material";
 
@@ -34,7 +34,7 @@ const Navbar = () => {
     { text: "Dictionary", path: "/dictionary", icon: <BookIcon /> },
     { text: "World Records", path: "/world-records", icon: <TrophyIcon /> },
     { text: "Car Designs", path: "/car-designs", icon: <CarIcon /> },
-    { text: "Best Plugins", path: "/plugins", icon: <DownloadIcon /> },
+    // { text: "Best Plugins", path: "/plugins", icon: <DownloadIcon /> }, Deprecated for now due to prod instance not working, but dev will
   ];
 
   const handleDrawerToggle = () => {

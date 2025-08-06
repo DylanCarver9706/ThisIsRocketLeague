@@ -251,7 +251,8 @@ const Home = () => {
       <Container maxWidth="lg" sx={{ pb: 6 }}>
         {/* Quick Actions */}
         <Grid container spacing={3} sx={{ mb: 6 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Change 'md' to 3 when Plugins are added back */}
+          <Grid item xs={12} sm={6} md={4}>
             <Card sx={{ height: "100%", textAlign: "center" }}>
               <CardContent>
                 <BookIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
@@ -276,7 +277,8 @@ const Home = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Change 'md' to 3 when Plugins are added back */}
+          <Grid item xs={12} sm={6} md={4}>
             <Card sx={{ height: "100%", textAlign: "center" }}>
               <CardContent>
                 <TrophyIcon
@@ -303,7 +305,8 @@ const Home = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Change 'md' to 3 when Plugins are added back */}
+          <Grid item xs={12} sm={6} md={4}>
             <Card sx={{ height: "100%", textAlign: "center" }}>
               <CardContent>
                 <TrophyIcon
@@ -330,7 +333,8 @@ const Home = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Plugins are deprecated for now due to prod instance not working, but dev will */}
+          {/* <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ height: "100%", textAlign: "center" }}>
               <CardContent>
                 <TrophyIcon
@@ -356,7 +360,7 @@ const Home = () => {
                 </Button>
               </CardContent>
             </Card>
-          </Grid>
+          </Grid> */}
         </Grid>
 
         {/* Trending Content */}
