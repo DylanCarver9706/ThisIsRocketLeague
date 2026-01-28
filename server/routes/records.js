@@ -17,6 +17,9 @@ router.get("/:id", recordsController.getRecordById);
 // Create a new record
 router.post("/", recordsController.createRecord);
 
+// Bulk create records
+router.post("/bulk", recordsController.bulkCreateRecords);
+
 // Like a record
 router.post("/:id/like", recordsController.likeRecord);
 

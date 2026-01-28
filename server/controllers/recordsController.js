@@ -81,6 +81,71 @@ class RecordsController {
     }
   }
 
+  // Bulk create records
+  async bulkCreateRecords(req, res) {
+    try {
+      const { records } = req.body;
+
+      if (!Array.isArray(records)) {
+        return res.status(400).json({
+          success: false,
+          error: "Records must be an array",
+        });
+      }
+
+      const results = [];
+      const errors = [];
+
+      for (let i = 0; i < records.length; i++) {
+        const record = records[i];
+        try {
+          console.log(
+            `Creating record ${i + 1}/${records.length}: ${record.title}`
+          );
+          const result = await recordsService.createRecord(record);
+          results.push({
+            index: i,
+            title: record.title,
+            success: true,
+            data: result.data,
+          });
+          console.log(`✓ Successfully created: ${record.title}`);
+        } catch (error) {
+          console.error(
+            `✗ Failed to create record ${i + 1}/${records.length}: ${
+              record.title
+            }`,
+            error.message
+          );
+          errors.push({
+            index: i,
+            title: record.title,
+            success: false,
+            error: error.message,
+          });
+        }
+      }
+
+      res.status(201).json({
+        success: true,
+        message: `Bulk creation completed. ${results.length} successful, ${errors.length} failed.`,
+        results,
+        errors,
+        summary: {
+          total: records.length,
+          successful: results.length,
+          failed: errors.length,
+        },
+      });
+    } catch (error) {
+      console.error("Controller error in bulk creating records:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process bulk record creation",
+      });
+    }
+  }
+
   // Like a record
   async likeRecord(req, res) {
     try {

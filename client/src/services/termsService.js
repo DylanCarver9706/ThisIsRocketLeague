@@ -80,6 +80,17 @@ export const termsService = {
     }
   },
 
+  // Get term suggestions for @tag autocomplete
+  suggest: async (q, limit = 10) => {
+    try {
+      const response = await termsAPI.suggest(q, limit);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching term suggestions:", error);
+      throw error;
+    }
+  },
+
   // Fetch terms with state management
   fetchTerms: async (
     filters,

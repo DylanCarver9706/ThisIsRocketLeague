@@ -6,6 +6,10 @@ const {
 const { ObjectId } = require("mongodb");
 
 class TermsService {
+  escapeRegexLiteral(str) {
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   // Extract tags from text and convert to structured format
   extractTags(text) {
     const tags = [];
@@ -100,6 +104,34 @@ class TermsService {
       };
     } catch (error) {
       console.error("Error fetching terms:", error);
+      throw error;
+    }
+  }
+
+  // Get term suggestions for @tag autocomplete (published only)
+  async getTermSuggestions(params = {}) {
+    try {
+      const { q = "", limit = 10 } = params;
+
+      const safeLimit = Math.max(1, Math.min(parseInt(limit) || 10, 25));
+      const trimmedQuery = String(q || "").trim();
+
+      const filter = { status: "published" };
+      if (trimmedQuery) {
+        // Escape user input so special regex characters are treated literally
+        const escaped = this.escapeRegexLiteral(trimmedQuery);
+        filter.title = { $regex: escaped, $options: "i" };
+      }
+
+      const suggestions = await collections.termsCollection
+        .find(filter, { projection: { title: 1, definition: 1, tags: 1 } })
+        .sort({ title: 1 })
+        .limit(safeLimit)
+        .toArray();
+
+      return { success: true, data: suggestions, count: suggestions.length };
+    } catch (error) {
+      console.error("Error fetching term suggestions:", error);
       throw error;
     }
   }

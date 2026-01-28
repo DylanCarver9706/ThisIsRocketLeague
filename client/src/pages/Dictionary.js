@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -82,7 +82,7 @@ const Dictionary = () => {
   const [activeTagField, setActiveTagField] = useState(null);
 
   useEffect(() => {
-    const { terms, totalPages } = termsService.fetchTerms(
+    termsService.fetchTerms(
       filters,
       page,
       setTerms,
@@ -90,9 +90,57 @@ const Dictionary = () => {
       setLoading,
       setError
     );
-    setTerms(terms);
-    setTotalPages(totalPages);
   }, [filters, page]);
+
+  const tagSuggestTimeoutRef = useRef(null);
+  const tagSuggestRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (tagSuggestTimeoutRef.current) {
+        clearTimeout(tagSuggestTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const resolveTaggedPlaceholders = (text, tags = []) => {
+    if (!text) return "";
+    if (!tags || tags.length === 0) return text;
+
+    const tagMap = tags.reduce((acc, tag) => {
+      acc[String(tag.position)] = tag;
+      return acc;
+    }, {});
+
+    return String(text).replace(/@(\d+)@/g, (_, position) => {
+      return tagMap[String(position)]?.tagTitle ?? "";
+    });
+  };
+
+  const getSuggestionPreview = (term, maxLen = 50) => {
+    const resolved = resolveTaggedPlaceholders(term?.definition || "", term?.tags);
+    if (resolved.length <= maxLen) return resolved;
+    return resolved.substring(0, maxLen) + "...";
+  };
+
+  const queueTagSuggestionsFetch = (query) => {
+    if (tagSuggestTimeoutRef.current) {
+      clearTimeout(tagSuggestTimeoutRef.current);
+    }
+
+    const requestId = ++tagSuggestRequestIdRef.current;
+
+    tagSuggestTimeoutRef.current = setTimeout(async () => {
+      try {
+        const result = await termsService.suggest(query, 10);
+        if (tagSuggestRequestIdRef.current !== requestId) return;
+        setTagSuggestions((result.data || []).slice(0, 5));
+      } catch (err) {
+        if (tagSuggestRequestIdRef.current !== requestId) return;
+        setTagSuggestions([]);
+      }
+    }, 150);
+  };
 
   const handleLike = async (termId, event) => {
     event.stopPropagation(); // Prevent card click when clicking like button
@@ -168,13 +216,7 @@ const Dictionary = () => {
           if (!hasSpaceAfterAt) {
             // We're typing a new tag, show suggestions
             const searchTerm = textBeforeCursor.substring(atIndex + 1);
-            const filteredTerms = terms.filter(
-              (term) =>
-                term.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                term.title.toLowerCase() !== searchTerm.toLowerCase()
-            );
-
-            setTagSuggestions(filteredTerms.slice(0, 5));
+            queueTagSuggestionsFetch(searchTerm);
             setShowTagSuggestions(true);
             setTagInputPosition({ start: atIndex, end: cursorPosition });
             setActiveTagField(field);
@@ -182,20 +224,24 @@ const Dictionary = () => {
             // There's a space after "@", don't show suggestions
             setShowTagSuggestions(false);
             setActiveTagField(null);
+            setTagSuggestions([]);
           }
         } else {
           // We're inside a @term@ tag, don't show suggestions
           setShowTagSuggestions(false);
           setActiveTagField(null);
+          setTagSuggestions([]);
         }
       } else {
         // We're inside an existing tag, don't show suggestions
         setShowTagSuggestions(false);
         setActiveTagField(null);
+        setTagSuggestions([]);
       }
     } else {
       setShowTagSuggestions(false);
       setActiveTagField(null);
+      setTagSuggestions([]);
     }
 
     setSubmitForm((prev) => ({ ...prev, [field]: value }));
@@ -210,6 +256,8 @@ const Dictionary = () => {
 
     setSubmitForm((prev) => ({ ...prev, [field]: newValue }));
     setShowTagSuggestions(false);
+    setActiveTagField(null);
+    setTagSuggestions([]);
   };
 
   const handleFilterChange = (field, value) => {
@@ -231,25 +279,6 @@ const Dictionary = () => {
       ) {
         setSubmitError("Please fill in all required fields");
         return;
-      }
-
-      // Validate that all @term@ tags are properly formatted
-      const definitionTags = submitForm.definition.match(/@([^@]+)@/g) || [];
-      const exampleTags = submitForm.exampleUsage.match(/@([^@]+)@/g) || [];
-      const allTags = [...definitionTags, ...exampleTags];
-
-      if (allTags.length > 0) {
-        // Check that all tags have valid term names
-        const tagNames = allTags.map((tag) => tag.match(/@([^@]+)@/)[1].trim());
-        const validTagNames = terms.map((term) => term.title);
-
-        const invalidTags = tagNames.filter(
-          (tagName) => !validTagNames.includes(tagName)
-        );
-        if (invalidTags.length > 0) {
-          setSubmitError(`Invalid tag names: ${invalidTags.join(", ")}`);
-          return;
-        }
       }
 
       await termsService.create(submitForm);
@@ -657,7 +686,7 @@ const Dictionary = () => {
                       >
                         <ListItemText
                           primary={term.title}
-                          secondary={term.definition.substring(0, 50) + "..."}
+                          secondary={getSuggestionPreview(term, 50)}
                         />
                       </ListItem>
                     ))}
@@ -720,7 +749,7 @@ const Dictionary = () => {
                       >
                         <ListItemText
                           primary={term.title}
-                          secondary={term.definition.substring(0, 50) + "..."}
+                          secondary={getSuggestionPreview(term, 50)}
                         />
                       </ListItem>
                     ))}

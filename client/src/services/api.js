@@ -40,6 +40,7 @@ api.interceptors.response.use(
 // Terms API
 export const termsAPI = {
   getAll: (params = {}) => api.get("/terms", { params }),
+  suggest: (q, limit = 10) => api.get("/terms/suggest", { params: { q, limit } }),
   getById: (id) => api.get(`/terms/${id}`),
   getBySlug: (slug) => api.get(`/terms/slug/${slug}`),
   create: (data) => api.post("/terms", data),
